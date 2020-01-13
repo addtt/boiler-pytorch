@@ -32,6 +32,6 @@ Requirements:
 - `numpy 1.17.4`
 - `torch 1.3.1`
 - `torchvision 0.4.2`
-- `tensorboard 2.1.0` (it also works without, it just won't save logs)
+- `tensorboard 2.1.0` (it also works without, but it won't save tensorboard logs)
 - `tqdm 4.40.2`
-- `pillow 6.2.2` (its current version 7.0 doesn't work with torchvision))
+- `pillow 6.2.2` (its current version 7.0 doesn't work with torchvision)
