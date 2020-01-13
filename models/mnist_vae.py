@@ -50,7 +50,7 @@ class MnistVAE(BaseGenerativeModel):
 
 
     def sample_prior(self, n_imgs, **kwargs):
-        z = self.pz.sample([n_imgs, self.z_dim])
+        z = self.pz.sample([n_imgs, self.z_dim]).to(self.get_device())
         mean = self.decoder(z).view((n_imgs, 1, 28, 28))
         pxz = Normal(mean, data_std)
         return pxz.sample()
