@@ -13,9 +13,10 @@ for MNIST quickly hacked together. The example files/folders are:
 - `models/`
 - `experiments/`
 
-Run the example:
+Install requirements and run the example:
 
 ```
+pip install -r requirements.txt
 CUDA_VISIBLE_DEVICES=0 python example.py
 ```
 
