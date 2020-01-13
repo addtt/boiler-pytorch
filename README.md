@@ -2,7 +2,7 @@
 
 Basic framework for training stuff in PyTorch. It's quite tailored to projects 
 I've been working on lately, so it's meant for personal use. Its sole purpose is 
-to do away with **boiler**plate code, and having it here makes it easier to 
+to do away with *boiler*plate code, and having it here makes it easier to 
 share it across projects.
 
 ## Usage example/template
@@ -14,15 +14,17 @@ for MNIST quickly hacked together. The example files/folders are:
 - `experiments/`
 
 Run the example:
-```shell script
-CUDA_VISIBLE_DEVICES=0 python example.py
-```
+
+    ```shell script
+    CUDA_VISIBLE_DEVICES=0 python example.py
+    ```
 
 ### Requirements:
 
-```
-numpy 1.17.4
-torch 1.3.1
-torchvision 0.4.2
-tqdm 4.40.2
-```
+    ```
+    python 3.7
+    numpy 1.17.4
+    torch 1.3.1
+    torchvision 0.4.2
+    tqdm 4.40.2
+    ```
