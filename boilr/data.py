@@ -42,8 +42,11 @@ class BaseDatasetManager:
         """
 
         # Default arguments for dataloaders
+        nw = 0
+        if 'num_workers' in kwargs:
+        	nw = kwargs['num_workers']
         cuda = kwargs['cuda']
-        dl_kwargs = {'num_workers': 1, 'pin_memory': False} if cuda else {}
+        dl_kwargs = {'num_workers': nw, 'pin_memory': False} if cuda else {}
 
         dl_train = DataLoader(
             train,
