@@ -6,13 +6,13 @@ from torch.distributions import Bernoulli
 from torch.distributions.kl import kl_divergence
 from torchvision.utils import save_image
 
-from boiler import BaseExperimentManager
+from boiler import VIExperimentManager
 from models.mnist_vae import MnistVAE
 from .config import parse_args
 from .data import DatasetManager
 
 
-class MnistExperiment(BaseExperimentManager):
+class MnistExperiment(VIExperimentManager):
     """
     Experiment manager.
 

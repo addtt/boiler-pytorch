@@ -8,7 +8,7 @@ packages = [p for p in packages if p.startswith('boiler')]
 
 setuptools.setup(
     name="boiler",
-    version="0.0.1",
+    version="0.1.0",
     author="Andrea Dittadi",
     author_email="andrea.dittadi@gmail.com",
     description="Basic framework for training models with PyTorch",

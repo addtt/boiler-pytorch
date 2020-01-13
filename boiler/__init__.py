@@ -1,3 +1,3 @@
-from .experiment import BaseExperimentManager
+from .experiment import *
 from .models import *
 from .trainer import Trainer

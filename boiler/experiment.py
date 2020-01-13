@@ -125,12 +125,50 @@ class BaseExperimentManager:
         raise NotImplementedError
 
 
-    def test_procedure(self, iw_samples=None):
+    def test_procedure(self, **kwargs):
         """
         Execute test procedure for the experiment. This typically includes
         collecting metrics on the test set using forward_pass().
         For example in variational inference we might be interested in
         repeating this many times to derive the importance-weighted ELBO.
+
+        :return: summaries (dict)
+        """
+        raise NotImplementedError
+
+
+    def additional_testing(self, img_folder):
+        """
+        Perform additional testing, including possibly generating images.
+
+        :param img_folder: folder to store images
+        """
+        raise NotImplementedError
+
+
+class VIExperimentManager(BaseExperimentManager):
+    """
+    Variational inference experiment manager. This version implements a default
+    test_procedure for variational inference.
+
+    Data attributes:
+    - 'args': argparse.Namespace containing all config parameters. When
+      initializing the MnistExperiment, if 'args' is not given, all config
+      parameters are set based on experiment defaults and user input, using
+      argparse.
+    - 'run_description': string description of the run that includes a timestamp
+      and can be used e.g. as folder name for logging.
+    - 'model': the model.
+    - 'device': torch.device that is being used
+    - 'dataloaders': DataLoaders, with attributes 'train' and 'test'
+    - 'optimizer': the optimizer
+    """
+
+    def test_procedure(self, iw_samples=None):
+        """
+        Execute test procedure for the experiment. This typically includes
+        collecting metrics on the test set using forward_pass().
+        Repeat this many times to derive the importance-weighted ELBO.
 
         :param iw_samples: number of samples for the importance-weighted ELBO.
                 The other metrics are also averaged over all these samples,
@@ -186,12 +224,3 @@ class BaseExperimentManager:
         summaries = summarizers.get_all(reset=True)
 
         return summaries
-
-
-    def additional_testing(self, img_folder):
-        """
-        Perform additional testing, including possibly generating images.
-
-        :param img_folder: folder to store images
-        """
-        raise NotImplementedError
