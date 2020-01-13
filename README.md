@@ -19,12 +19,16 @@ Run the example:
 CUDA_VISIBLE_DEVICES=0 python example.py
 ```
 
-### Requirements:
+### Requirements
 
 ```
 python 3.7
 numpy 1.17.4
 torch 1.3.1
 torchvision 0.4.2
+tensorboard 2.1.0
 tqdm 4.40.2
+pillow 6.2.2
 ```
+
+(Pillow has to be specified because its current version 7.0 doesn't work with torchvision)
