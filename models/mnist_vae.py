@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.distributions import Normal
 
-from boiler import BaseGenerativeModel
+from boilr import BaseGenerativeModel
 
 data_std = .02
 

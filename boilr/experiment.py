@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from boiler.summarize import SummarizerCollection
+from boilr.summarize import SummarizerCollection
 
 
 class BaseExperimentManager:

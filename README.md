@@ -1,4 +1,4 @@
-# boiler
+# boiler-pytorch
 
 Basic framework for training stuff in PyTorch. It's quite tailored to projects 
 I've been working on lately, so it's meant for personal use. Its sole purpose is 
@@ -8,7 +8,7 @@ share it across projects.
 ## Install
 
 ```shell script
-pip install git+https://github.com/addtt/boiler.git
+pip install git+https://github.com/addtt/boiler-pytorch.git
 ```
 
 ## Usage example/template

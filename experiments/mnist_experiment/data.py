@@ -1,6 +1,6 @@
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
-from boiler.data import BaseDatasetManager
+from boilr.data import BaseDatasetManager
 
 path = 'data'
 

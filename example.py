@@ -1,4 +1,4 @@
-from boiler import Trainer
+from boilr import Trainer
 from experiments import MnistExperiment
 
 
