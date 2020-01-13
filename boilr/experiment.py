@@ -11,7 +11,7 @@ class BaseExperimentManager:
 
     Data attributes:
     - 'args': argparse.Namespace containing all config parameters. When
-      initializing the MnistExperiment, if 'args' is not given, all config
+      initializing this object, if 'args' is not given, all config
       parameters are set based on experiment defaults and user input, using
       argparse.
     - 'run_description': string description of the run that includes a timestamp
@@ -153,7 +153,7 @@ class VIExperimentManager(BaseExperimentManager):
 
     Data attributes:
     - 'args': argparse.Namespace containing all config parameters. When
-      initializing the MnistExperiment, if 'args' is not given, all config
+      initializing this object, if 'args' is not given, all config
       parameters are set based on experiment defaults and user input, using
       argparse.
     - 'run_description': string description of the run that includes a timestamp
