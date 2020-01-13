@@ -15,16 +15,16 @@ for MNIST quickly hacked together. The example files/folders are:
 
 Run the example:
 
-    ```shell script
-    CUDA_VISIBLE_DEVICES=0 python example.py
-    ```
+```
+CUDA_VISIBLE_DEVICES=0 python example.py
+```
 
 ### Requirements:
 
-    ```
-    python 3.7
-    numpy 1.17.4
-    torch 1.3.1
-    torchvision 0.4.2
-    tqdm 4.40.2
-    ```
+```
+python 3.7
+numpy 1.17.4
+torch 1.3.1
+torchvision 0.4.2
+tqdm 4.40.2
+```
