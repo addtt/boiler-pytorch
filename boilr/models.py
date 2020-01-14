@@ -37,7 +37,7 @@ class BaseModel(nn.Module):
         print("Loading model checkpoint at step {}...".format(step))
         path = join(ckpt_folder, ckpt_name)
         self.load_state_dict(torch.load(path, map_location=device))
-        self.global_step = step + 1  # avoid saving log and checkpoint twice
+        self.global_step = step
         print("Loaded.")
 
 

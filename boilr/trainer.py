@@ -128,6 +128,9 @@ class Trainer:
 
     def run(self):
 
+        # This is needed when loading to resume training
+        first_step = True
+
         # Setup
         e = self.experiment
         train_loader = e.dataloaders.train
@@ -150,7 +153,7 @@ class Trainer:
                         self._test(epoch)
 
                     # Save model checkpoint
-                    if step > 0 and step % e.args.checkpoint_interval == 0:
+                    if not first_step and step % e.args.checkpoint_interval == 0:
                         print("* saving model checkpoint at step {}".format(step))
                         e.model.checkpoint(self.checkpoint_folder)
 
@@ -202,6 +205,8 @@ class Trainer:
 
                 # Increment model's global step variable
                 e.model.increment_global_step()
+
+                first_step = False
 
     def _test(self, epoch):
         e = self.experiment
