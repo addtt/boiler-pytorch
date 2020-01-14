@@ -7,8 +7,14 @@ class History:
     """
     Wrapper of SummarizerCollection to register new history values with timestamp.
     """
-    def __init__(self):
-        self.summarizers = SummarizerCollection(mode='store_all')
+    def __init__(self, init_history=None):
+        if init_history is None:
+            self.summarizers = SummarizerCollection(mode='store_all')
+        else:
+            msg = ("provided initialization argument has to be "
+                   "an instance of SummarizerCollection")
+            assert isinstance(init_history, SummarizerCollection), msg
+            self.summarizers = init_history
 
     def add(self, summaries, timestamp):
         """
