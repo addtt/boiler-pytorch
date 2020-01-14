@@ -98,6 +98,16 @@ class BaseExperimentManager:
         self.optimizer = self.make_optimizer()
 
 
+    def load_model(self, checkpoint_folder, step=None):
+        """
+        Loads model weights from a checkpoint in the specified folder.
+        If step is given, it attempts to load the checkpoint at that step.
+        The weights are loaded with map_location=device, where device is the
+        current device of this experiment.
+        """
+        self.model.load(checkpoint_folder, self.device, step=step)
+
+
     def forward_pass(self, model, x, y=None):
         """
         Simple single-pass model evaluation. It consists of a forward pass
