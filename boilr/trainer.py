@@ -152,7 +152,7 @@ class Trainer:
                     self.train_history.add(summaries, step)
                     if not e.args.dry_run:
                         with open(self.log_path, 'wb') as fd:
-                            pickle.dump(self.train_history.get_dict(), fd)
+                            pickle.dump(self._history_dict(), fd)
                         if self.tb_writer is not None:
                             for k, v in summaries.items():
                                 self.tb_writer.add_scalar('train_' + k, v, step)
@@ -191,10 +191,17 @@ class Trainer:
 
             # Save history to file
             with open(self.log_path, 'wb') as fd:
-                pickle.dump(self.test_history.get_dict(), fd)
+                pickle.dump(self._history_dict(), fd)
 
         # Training mode
         e.model.train()
+
+
+    def _history_dict(self):
+        return {
+            'train': self.train_history.get_dict(),
+            'test': self.test_history.get_dict(),
+        }
 
 
     @staticmethod
