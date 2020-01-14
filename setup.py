@@ -8,7 +8,7 @@ packages = [p for p in packages if p.startswith('boilr')]
 
 setuptools.setup(
     name="boilr",
-    version="0.2.0",
+    version="0.3.0",
     author="Andrea Dittadi",
     author_email="andrea.dittadi@gmail.com",
     description="Basic framework for training models with PyTorch",
