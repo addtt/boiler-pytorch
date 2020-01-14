@@ -80,7 +80,7 @@ def is_linear(m):
     return isinstance(m, torch.nn.Linear)
 
 
-def img_grid_pad_value(imgs, thresh=.5):
+def img_grid_pad_value(imgs, thresh=.2):
     """
     Hack to visualize boundaries between images with torchvision's save_image().
     If the median border value of all images is below the threshold, use white,
