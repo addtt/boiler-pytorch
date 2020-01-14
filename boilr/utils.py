@@ -90,7 +90,7 @@ def img_grid_pad_value(imgs, thresh=.5):
     :return: padding value
     """
 
-    assert imgs.ndim() == 4
+    assert imgs.dim() == 4
     assert 0. <= imgs.min() and imgs.max() <= 1.
     assert 0. < thresh < 1.
 
@@ -106,3 +106,8 @@ def img_grid_pad_value(imgs, thresh=.5):
     if torch.median(borders) < thresh:
         return 1.0
     return 0.0
+
+
+if __name__ == '__main__':
+    # Test
+    img_grid_pad_value(torch.rand(6, 3, 32, 32), thresh=.3)
