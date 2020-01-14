@@ -78,3 +78,31 @@ def is_conv(m):
 
 def is_linear(m):
     return isinstance(m, torch.nn.Linear)
+
+
+def img_grid_pad_value(imgs, thresh=.5):
+    """
+    Hack to visualize boundaries between images with torchvision's save_image().
+    If the median border value of all images is below the threshold, use white,
+    otherwise black (which is the default)
+    :param imgs: 4d tensor
+    :param thresh: threshold in (0, 1)
+    :return: padding value
+    """
+
+    assert imgs.ndim() == 4
+    assert 0. <= imgs.min() and imgs.max() <= 1.
+    assert 0. < thresh < 1.
+
+    imgs = imgs.mean(1)  # reduce to 1 channel
+    h = imgs.size(1)
+    w = imgs.size(2)
+    borders = list()
+    borders.append(imgs[:, 0].flatten())
+    borders.append(imgs[:, h - 1].flatten())
+    borders.append(imgs[:, 1:h - 1, 0].flatten())
+    borders.append(imgs[:, 1:h - 1, w - 1].flatten())
+    borders = torch.cat(borders)
+    if torch.median(borders) < thresh:
+        return 1.0
+    return 0.0
