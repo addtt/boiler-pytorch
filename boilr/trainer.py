@@ -150,16 +150,15 @@ class Trainer:
                 step = e.model.global_step
                 if step % e.args.test_log_interval == 0:
 
-                    if not first_step:
-
-                        # Test model
+                    # Test model (unless we just resumed training)
+                    if not first_step or step == 0:
                         with torch.no_grad():
                             self._test(epoch)
 
-                        # Save model checkpoint
-                        if step % e.args.checkpoint_interval == 0:
-                            print("* saving model checkpoint at step {}".format(step))
-                            e.model.checkpoint(self.checkpoint_folder)
+                    # Save model checkpoint (unless we just started/resuming training)
+                    if not first_step and step % e.args.checkpoint_interval == 0:
+                        print("* saving model checkpoint at step {}".format(step))
+                        e.model.checkpoint(self.checkpoint_folder)
 
                     # Restart progress bar
                     progress = tqdm(total=e.args.test_log_interval, desc='train')
