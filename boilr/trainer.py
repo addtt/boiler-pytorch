@@ -23,7 +23,7 @@ class Trainer:
     defined and performed in an experiment object, which is provided at init.
     """
 
-    def __init__(self, experiment, create_optimizer=True):
+    def __init__(self, experiment):
         self.experiment = experiment
         args = experiment.args
         assert args.checkpoint_interval % args.test_log_interval == 0
@@ -80,11 +80,10 @@ class Trainer:
         print_num_params(experiment.model, max_depth=3)
 
         # Optimizer
-        if create_optimizer:
-            experiment.make_and_set_optimizer()
+        experiment.make_and_set_optimizer()
 
         # Check everything is initialized properly
-        self._check_experiment(experiment, create_optimizer)
+        self._check_experiment(experiment)
 
 
     def run(self):
@@ -199,14 +198,13 @@ class Trainer:
 
 
     @staticmethod
-    def _check_experiment(e, opt):
+    def _check_experiment(e):
         attributes = [
             e.device,
             e.dataloaders,
             e.model,
             e.args,
             e.run_description,
+            e.optimizer,
         ]
-        if opt:
-            attributes.append(e.optimizer)
         assert not (None in attributes)
