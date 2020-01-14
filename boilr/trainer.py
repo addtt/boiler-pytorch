@@ -55,9 +55,6 @@ class Trainer:
                 history = pickle.load(file)
                 self.train_history = History(history['train'])
                 self.test_history = History(history['test'])
-                print('loaded')
-                print(self.test_history.get_dict()['elbo/elbo'].__len__())
-                print(self.test_history.get_dict()['elbo/elbo'])
 
         assert args.checkpoint_interval % args.test_log_interval == 0
 

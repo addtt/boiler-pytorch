@@ -98,7 +98,7 @@ def parse_args():
     parser.add_argument('--resume',
                         type=str,
                         metavar='NAME',
-                        default="200114_130927_seed42",
+                        default="",
                         help="load the run with this name and resume training")
 
     args = parser.parse_args()
