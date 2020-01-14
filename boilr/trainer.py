@@ -26,44 +26,80 @@ class Trainer:
     def __init__(self, experiment):
         self.experiment = experiment
         args = experiment.args
+        resume = args.resume != ""
+
+        if resume:
+            # Folder string = run name = resume argument
+            folder_str = args.resume
+
+            # Get all folder names to resume saving results
+            result_folder = os.path.join('results', folder_str)
+            self.img_folder = os.path.join(result_folder, 'imgs')
+            self.checkpoint_folder = os.path.join('checkpoints', folder_str)
+            self.log_path = os.path.join(result_folder, 'log.pkl')
+            tboard_folder = os.path.join('tensorboard_logs', folder_str)
+            self.tb_writer = None
+            if have_tensorboard:  # maybe we didn't have tboard originally
+                os.makedirs(tboard_folder, exist_ok=True)
+                self.tb_writer = tensorboard.SummaryWriter(tboard_folder)
+
+            # Forget about all arguments, load all of them from saved config
+            # (the 'resume' argument is overwritten in the process)
+            config_path = os.path.join(self.checkpoint_folder, 'config.pkl')
+            with open(config_path, 'rb') as file:
+                args = pickle.load(file)
+            assert not args.dry_run  # this would not make sense
+
+            # Load training and test history from log.pkl
+            with open(self.log_path, 'rb') as file:
+                history = pickle.load(file)
+                self.train_history = History(history['train'])
+                self.test_history = History(history['test'])
+                print('loaded')
+                print(self.test_history.get_dict()['elbo/elbo'].__len__())
+                print(self.test_history.get_dict()['elbo/elbo'])
+
         assert args.checkpoint_interval % args.test_log_interval == 0
 
-        # To save training and test metrics
-        self.train_history = History()
-        self.test_history = History()
-
-        # Random seed
-        set_rnd_seed(args.seed)
 
         # Pick device (cpu/cuda)
         use_cuda = not args.no_cuda and torch.cuda.is_available()
         self.device = torch.device("cuda" if use_cuda else "cpu")
         experiment.device = self.device  # copy device to experiment manager
 
-        # Get starting time and date for logging
-        date_str = get_date_str()
+        if not resume:
 
-        # Print info
-        print('Device: {}, start time: {}'.format(self.device, date_str))
+            # To save training and test metrics
+            self.train_history = History()
+            self.test_history = History()
 
-        # Create folders for logs and results, save config
-        folder_str = date_str + '_' + experiment.run_description
-        result_folder = os.path.join('results', folder_str)
-        self.img_folder = os.path.join(result_folder, 'imgs')
-        self.checkpoint_folder = os.path.join('checkpoints', folder_str)
-        self.log_path = os.path.join(result_folder, 'log.pkl')
-        tboard_folder = os.path.join('tensorboard_logs', folder_str)
-        self.tb_writer = None
-        if not args.dry_run:
-            os.makedirs(result_folder)
-            os.makedirs(self.img_folder)
-            os.makedirs(self.checkpoint_folder)
-            if have_tensorboard:
-                os.makedirs(tboard_folder)
-                self.tb_writer = tensorboard.SummaryWriter(tboard_folder)
-            config_path = os.path.join(self.checkpoint_folder, 'config.pkl')
-            with open(config_path, 'wb') as fd:
-                pickle.dump(args, fd)
+            # Random seed
+            set_rnd_seed(args.seed)
+
+            # Get starting time and date for logging
+            date_str = get_date_str()
+
+            # Print info
+            print('Device: {}, start time: {}'.format(self.device, date_str))
+
+            # Create folders for logs and results, save config
+            folder_str = date_str + '_' + experiment.run_description
+            result_folder = os.path.join('results', folder_str)
+            self.img_folder = os.path.join(result_folder, 'imgs')
+            self.checkpoint_folder = os.path.join('checkpoints', folder_str)
+            self.log_path = os.path.join(result_folder, 'log.pkl')
+            tboard_folder = os.path.join('tensorboard_logs', folder_str)
+            self.tb_writer = None
+            if not args.dry_run:
+                os.makedirs(result_folder)
+                os.makedirs(self.img_folder)
+                os.makedirs(self.checkpoint_folder)
+                if have_tensorboard:
+                    os.makedirs(tboard_folder)
+                    self.tb_writer = tensorboard.SummaryWriter(tboard_folder)
+                config_path = os.path.join(self.checkpoint_folder, 'config.pkl')
+                with open(config_path, 'wb') as fd:
+                    pickle.dump(args, fd)
 
         # Dataset
         print("Getting dataset ready...")
@@ -74,10 +110,14 @@ class Trainer:
             len(experiment.dataloaders.test.dataset),
         ))
 
-        # MnistVAE
+        # Model
         print("Creating model...")
         experiment.make_and_set_model()
         print_num_params(experiment.model, max_depth=3)
+
+        # Load weights if resuming training
+        if resume:
+            experiment.load_model(self.checkpoint_folder, step=None)
 
         # Optimizer
         experiment.make_and_set_optimizer()

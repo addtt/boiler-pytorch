@@ -95,6 +95,12 @@ def parse_args():
                         dest='dry_run',
                         help='do not save anything to disk')
 
+    parser.add_argument('--resume',
+                        type=str,
+                        metavar='NAME',
+                        default="200114_130927_seed42",
+                        help="load the run with this name and resume training")
+
     args = parser.parse_args()
 
     assert args.loglik_interval % args.test_log_interval == 0
