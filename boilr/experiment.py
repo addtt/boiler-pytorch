@@ -34,8 +34,7 @@ class BaseExperimentManager:
         self.run_description = self._make_run_description(self.args)
 
 
-    @staticmethod
-    def _parse_args():
+    def _parse_args(self):
         """
         Parse command-line arguments defining experiment settings.
 
@@ -43,6 +42,90 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
+    def add_required_args(self,
+                          parser,
+                          batch_size,
+                          test_batch_size,
+                          lr,
+                          seed=54321,
+                          log_interval=10000,
+                          test_log_interval=10000,
+                          checkpoint_interval=100000,
+                          resume="",
+                          ):
+
+        parser.add_argument('--batch-size',
+                            type=int,
+                            default=batch_size,
+                            metavar='N',
+                            dest='batch_size',
+                            help='training batch size')
+
+        parser.add_argument('--test-batch-size',
+                            type=int,
+                            default=test_batch_size,
+                            metavar='N',
+                            dest='test_batch_size',
+                            help='test batch size')
+
+        parser.add_argument('--lr',
+                            type=float,
+                            default=lr,
+                            metavar='LR',
+                            dest='lr',
+                            help='learning rate')
+
+        parser.add_argument('--seed',
+                            type=int,
+                            default=seed,
+                            metavar='N',
+                            dest='seed',
+                            help='random seed')
+
+        parser.add_argument('--tr-log-interv',
+                            type=int,
+                            default=log_interval,
+                            metavar='N',
+                            dest='log_interval',
+                            help='number of batches before logging train status')
+
+        parser.add_argument('--ts-log-interv',
+                            type=int,
+                            default=test_log_interval,
+                            metavar='N',
+                            dest='test_log_interval',
+                            help='number of batches before logging test status')
+
+        parser.add_argument('--ckpt-interv',
+                            type=int,
+                            default=checkpoint_interval,
+                            metavar='N',
+                            dest='checkpoint_interval',
+                            help='number of batches before saving model checkpoint')
+
+        parser.add_argument('--nocuda',
+                            action='store_true',
+                            dest='no_cuda',
+                            help='do not use cuda')
+
+        parser.add_argument('--descr',
+                            type=str,
+                            default='',
+                            metavar='STR',
+                            dest='additional_descr',
+                            help='additional description for experiment name')
+
+        parser.add_argument('--dry-run',
+                            action='store_true',
+                            dest='dry_run',
+                            help='do not save anything to disk')
+
+        parser.add_argument('--resume',
+                            type=str,
+                            metavar='NAME',
+                            default=resume,
+                            dest='resume',
+                            help="load the run with this name and resume training")
 
     @staticmethod
     def _make_run_description(args):
@@ -234,3 +317,30 @@ class VIExperimentManager(BaseExperimentManager):
         summaries = summarizers.get_all(reset=True)
 
         return summaries
+
+
+    def add_required_args(self,
+                          parser,
+                          *args,
+                          ll_every=50000,
+                          loglik_samples=100,
+                          **kwargs
+                          ):
+
+        super().add_required_args(parser, *args, **kwargs)
+
+        parser.add_argument('--ll-interv',
+                            type=int,
+                            default=ll_every,
+                            metavar='N',
+                            dest='loglik_interval',
+                            help='number of batches before evaluating '
+                                 'log likelihood')
+
+        parser.add_argument('--ll-samples',
+                            type=int,
+                            default=loglik_samples,
+                            metavar='N',
+                            dest='loglik_samples',
+                            help='number of importance samples to evaluate '
+                                 'log likelihood')

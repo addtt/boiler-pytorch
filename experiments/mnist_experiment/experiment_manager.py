@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import torch
@@ -8,7 +9,6 @@ from torchvision.utils import save_image
 
 from boilr import VIExperimentManager
 from models.mnist_vae import MnistVAE
-from .config import parse_args
 from .data import DatasetManager
 
 
@@ -160,14 +160,43 @@ class MnistExperiment(VIExperimentManager):
         save_image(imgs, fname, nrow=n)
 
 
-    @staticmethod
-    def _parse_args():
+    def _parse_args(self):
         """
         Parse command-line arguments defining experiment settings.
 
         :return: args: argparse.Namespace with experiment settings
         """
-        return parse_args()
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            allow_abbrev=False)
+
+        self.add_required_args(parser,
+
+                               # General
+                               batch_size=64,
+                               test_batch_size=1000,
+                               lr=1e-4,
+                               seed=54321,
+                               log_interval=1000,
+                               test_log_interval=1000,
+                               checkpoint_interval=10000,
+                               resume="",
+
+                               # VI-specific
+                               ll_every=50000,
+                               loglik_samples=100,)
+
+        parser.add_argument('--wd',
+                            type=float,
+                            default=0.0,
+                            dest='weight_decay',
+                            help='weight decay')
+
+        args = parser.parse_args()
+
+        assert args.loglik_interval % args.test_log_interval == 0
+
+        return args
 
     @staticmethod
     def _make_run_description(args):
