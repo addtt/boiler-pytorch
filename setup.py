@@ -1,5 +1,7 @@
 import setuptools
 
+from boilr import __version__
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -8,7 +10,7 @@ packages = [p for p in packages if p.startswith('boilr')]
 
 setuptools.setup(
     name="boilr",
-    version="0.3.0",
+    version=__version__,
     author="Andrea Dittadi",
     author_email="andrea.dittadi@gmail.com",
     description="Basic framework for training models with PyTorch",
