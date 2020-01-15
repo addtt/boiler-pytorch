@@ -38,7 +38,9 @@ class MnistExperiment(VIExperimentManager):
         return MnistVAE()
 
     def make_optimizer(self):
-        return optim.Adam(self.model.parameters())
+        return optim.Adam(self.model.parameters(),
+                          lr=self.args.lr,
+                          weight_decay=self.args.weight_decay)
 
 
     def forward_pass(self, model, x, y=None):
@@ -71,14 +73,14 @@ class MnistExperiment(VIExperimentManager):
 
     @staticmethod
     def print_train_log(step, epoch, summaries):
-        s = ("       [step {}]   loss: {:.5g}   ELBO: {:.5g}   "
-             "recons: {:.3g}   KL: {:.3g}")
+        s = ("       [step {step}]   loss: {loss:.5g}   ELBO: {elbo:.5g}   "
+             "recons: {recons:.3g}   KL: {kl:.3g}")
         s = s.format(
-            step,
-            summaries['loss/loss'],
-            summaries['elbo/elbo'],
-            summaries['elbo/recons'],
-            summaries['elbo/kl'],
+            step=step,
+            loss=summaries['loss/loss'],
+            elbo=summaries['elbo/elbo'],
+            recons=summaries['elbo/recons'],
+            kl=summaries['elbo/kl'],
         )
         print(s)
 
@@ -88,8 +90,11 @@ class MnistExperiment(VIExperimentManager):
         log_string = "       "
         if epoch is not None:
             log_string += "[step {}, epoch {}]   ".format(step, epoch)
-        log_string += "ELBO {:.5g}   recons: {:.3g}   KL: {:.3g}".format(
-            summaries['elbo/elbo'], summaries['elbo/recons'], summaries['elbo/kl'])
+        s = "ELBO {elbo:.5g}   recons: {recons:.3g}   KL: {kl:.3g}"
+        log_string += s.format(
+            elbo=summaries['elbo/elbo'],
+            recons=summaries['elbo/recons'],
+            kl=summaries['elbo/kl'])
         ll_key = None
         for k in summaries.keys():
             if k.find('elbo_IW') > -1:
@@ -112,7 +117,6 @@ class MnistExperiment(VIExperimentManager):
             'elbo/kl': results['kl'].item(),
         }
         return metrics_dict
-
 
 
     def additional_testing(self, img_folder):
@@ -178,7 +182,7 @@ class MnistExperiment(VIExperimentManager):
                                # General
                                batch_size=64,
                                test_batch_size=1000,
-                               lr=1e-4,
+                               lr=1e-3,
                                seed=54321,
                                log_interval=1000,
                                test_log_interval=1000,
