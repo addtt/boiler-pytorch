@@ -91,7 +91,7 @@ def img_grid_pad_value(imgs, thresh=.2):
     """
 
     assert imgs.dim() == 4
-    assert 0. <= imgs.min() and imgs.max() <= 1.
+    imgs = imgs.clamp(min=0., max=1.)
     assert 0. < thresh < 1.
 
     imgs = imgs.mean(1)  # reduce to 1 channel
