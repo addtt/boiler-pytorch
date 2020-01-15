@@ -8,6 +8,7 @@ from torch.distributions.kl import kl_divergence
 from torchvision.utils import save_image
 
 from boilr import VIExperimentManager
+from boilr.utils import img_grid_pad_value
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
@@ -134,7 +135,8 @@ class MnistExperiment(VIExperimentManager):
             # Save model samples
             sample = self.model.sample_prior(n ** 2)
             fname = os.path.join(img_folder, 'sample_' + str(step) + '.png')
-            save_image(sample, fname, nrow=n)
+            pad = img_grid_pad_value(sample)
+            save_image(sample, fname, nrow=n, pad_value=pad)
 
             # Get first test batch
             (x, _) = next(iter(self.dataloaders.test))
@@ -157,7 +159,8 @@ class MnistExperiment(VIExperimentManager):
         imgs = torch.stack([x.cpu(), recons.cpu()])
         imgs = imgs.permute(1, 0, 2, 3, 4)
         imgs = imgs.reshape(n ** 2, x.size(1), x.size(2), x.size(3))
-        save_image(imgs, fname, nrow=n)
+        pad = img_grid_pad_value(imgs)
+        save_image(imgs, fname, nrow=n, pad_value=pad)
 
 
     def _parse_args(self):
