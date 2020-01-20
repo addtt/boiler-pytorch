@@ -103,26 +103,7 @@ class Trainer:
                 with open(config_path, 'wb') as fd:
                     pickle.dump(args, fd)
 
-        # Dataset
-        print("Getting dataset ready...")
-        experiment.make_and_set_datamanager()
-        print("Data shape: {}".format(experiment.dataloaders.data_shape))
-        print("Train/test set size: {}/{}".format(
-            len(experiment.dataloaders.train.dataset),
-            len(experiment.dataloaders.test.dataset),
-        ))
-
-        # Model
-        print("Creating model...")
-        experiment.make_and_set_model()
-        print_num_params(experiment.model, max_depth=3)
-
-        # Load weights if resuming training
-        if resume:
-            experiment.load_model(self.checkpoint_folder, step=None)
-
-        # Optimizer
-        experiment.make_and_set_optimizer()
+        experiment.setup(self.checkpoint_folder if resume else None)
 
         # Check everything is initialized properly
         self._check_experiment(experiment)

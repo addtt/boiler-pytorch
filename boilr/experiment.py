@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from boilr.summarize import SummarizerCollection
+from .summarize import SummarizerCollection
+from .utils import print_num_params
 
 
 class BaseExperimentManager:
@@ -145,12 +146,37 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
-    def make_and_set_datamanager(self):
+
+    def setup(self, checkpoint_folder=None):
         """
-        Calls the subclass's method make_datamanager() and assigns the returned
-        DatasetManagers to this class's 'dataloaders' attribute.
+        Setup experiment: load dataset, create model, load weights if a
+        checkpoint is given, create optimizer.
         """
+
+        # If checkpoint folder is given, load model from there to resume
+        resume = checkpoint_folder is not None
+
+        # Dataset
+        print("Getting dataset ready...")
         self.dataloaders = self.make_datamanager()
+        print("Data shape: {}".format(self.dataloaders.data_shape))
+        print("Train/test set size: {}/{}".format(
+            len(self.dataloaders.train.dataset),
+            len(self.dataloaders.test.dataset),
+        ))
+
+        # Model
+        print("Creating model...")
+        self.model = self.make_model().to(self.device)
+        print_num_params(self.model, max_depth=3)
+
+        # Load weights if resuming training
+        if resume:
+            self.load_model(checkpoint_folder, step=None)
+
+        # Optimizer
+        self.optimizer = self.make_optimizer()
+
 
     def make_model(self):
         """
@@ -159,12 +185,6 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
-    def make_and_set_model(self):
-        """
-        Calls the subclass's method make_model() and assigns the returned
-        model to this class's 'model' attribute.
-        """
-        self.model = self.make_model().to(self.device)
 
     def make_optimizer(self):
         """
@@ -172,13 +192,6 @@ class BaseExperimentManager:
         :return: optimizer
         """
         raise NotImplementedError
-
-    def make_and_set_optimizer(self):
-        """
-        Calls the subclass's method make_optimizer() and assigns the returned
-        optimizer to this class's 'optimizer' attribute.
-        """
-        self.optimizer = self.make_optimizer()
 
 
     def load_model(self, checkpoint_folder, step=None):
