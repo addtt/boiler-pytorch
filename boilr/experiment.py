@@ -43,6 +43,7 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
+
     def add_required_args(self,
                           parser,
                           batch_size,
@@ -128,6 +129,7 @@ class BaseExperimentManager:
                             dest='resume',
                             help="load the run with this name and resume training")
 
+
     @staticmethod
     def _make_run_description(args):
         """
@@ -139,10 +141,27 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
+
     def make_datamanager(self):
         """
         Create a DatasetManager object. To be overridden.
         :return: DatasetManager
+        """
+        raise NotImplementedError
+
+
+    def make_model(self):
+        """
+        Create a model. To be overridden.
+        :return: model
+        """
+        raise NotImplementedError
+
+
+    def make_optimizer(self):
+        """
+        Create an optimizer. To be overridden.
+        :return: optimizer
         """
         raise NotImplementedError
 
@@ -176,22 +195,6 @@ class BaseExperimentManager:
 
         # Optimizer
         self.optimizer = self.make_optimizer()
-
-
-    def make_model(self):
-        """
-        Create a model. To be overridden.
-        :return: model
-        """
-        raise NotImplementedError
-
-
-    def make_optimizer(self):
-        """
-        Create an optimizer. To be overridden.
-        :return: optimizer
-        """
-        raise NotImplementedError
 
 
     def load_model(self, checkpoint_folder, step=None):
