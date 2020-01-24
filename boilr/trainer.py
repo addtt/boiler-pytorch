@@ -54,6 +54,7 @@ class Trainer:
             with open(config_path, 'rb') as file:
                 args = pickle.load(file)
             assert not args.dry_run  # this would not make sense
+            experiment.args = args  # copy them over to the experiment
 
             # Load training and test history from log.pkl
             with open(self.log_path, 'rb') as file:
