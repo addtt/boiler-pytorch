@@ -14,7 +14,7 @@ except ImportError as e:
 from tqdm import tqdm
 
 from .summarize import History, SummarizerCollection
-from .utils import set_rnd_seed, get_date_str, print_num_params
+from .utils import set_rnd_seed, get_date_str
 
 
 class Trainer:
