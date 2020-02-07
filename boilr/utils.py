@@ -2,8 +2,10 @@ import datetime
 import random
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.utils.data
 
 
 def print_num_params(model, max_depth=None):
@@ -80,6 +82,18 @@ def is_linear(m):
     return isinstance(m, torch.nn.Linear)
 
 
+def named_leaf_modules(module):
+    # Should work under common naming assumptions, but it's not guaranteed
+    last_name = ''
+    for name, l in reversed(list(module.named_modules())):
+        if name not in last_name:
+            last_name = name
+            yield name, l
+
+
+############################
+### VIZ
+
 def img_grid_pad_value(imgs, thresh=.2):
     """
     Hack to visualize boundaries between images with torchvision's save_image().
@@ -106,6 +120,61 @@ def img_grid_pad_value(imgs, thresh=.2):
     if torch.median(borders) < thresh:
         return 1.0
     return 0.0
+
+
+def balanced_approx_factorization(x, ratio=1):
+    """
+    :param x:
+    :param ratio: ratio columns/rows
+    :return:
+    """
+
+    assert type(x) == int or x.dtype == int
+
+    # We want c/r to be approx equal to ratio, and r*c to be approx equal to x
+    # ==> r = x/c = x/(ratio*r)
+    # ==> r = sqrt(x/ratio) and c = sqrt(x*ratio)
+    c = np.ceil(np.sqrt(x * ratio))
+    r = np.ceil(x / c)
+    return r, c
+
+
+
+def clean_axes():
+    plt.gca().tick_params(
+        axis='both',  # changes apply to the x-axis
+        which='both',  # both major and minor ticks
+        left=False,  # ticks along the left edge are off
+        right=False,
+        bottom=False,
+        top=False,
+        labelleft=False,  # labels along the left edge are off
+        labelbottom=False)
+
+
+############################
+# Saving model activations
+
+
+def save_activation_hook(ord_dict, name):
+    def hook(model, inp, ret):
+        if isinstance(ret, tuple):
+            try:
+                ret = torch.cat(ret, dim=1)
+            except TypeError:
+                ret = ret[0]
+            except RuntimeError as e:
+                print("WARNING:", e)
+                return
+        ord_dict[name] = ret.detach()
+    return hook
+
+
+def set_up_saving_all_activations(model):
+    all_activations = OrderedDict()
+    for module_name, module in named_leaf_modules(model):
+        module.register_forward_hook(save_activation_hook(all_activations, module_name))
+    return all_activations
 
 
 if __name__ == '__main__':

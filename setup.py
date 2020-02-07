@@ -40,6 +40,7 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'torch',
+        'matplotlib',
         'tqdm',
     ]
 )
