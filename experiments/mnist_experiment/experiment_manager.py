@@ -43,18 +43,18 @@ class MnistExperiment(VIExperimentManager):
                           weight_decay=self.args.weight_decay)
 
 
-    def forward_pass(self, model, x, y=None):
+    def forward_pass(self, x, y=None):
         """
         Simple single-pass model evaluation. It consists of a forward pass
         and computation of all necessary losses and metrics.
         """
 
         x = x.to(self.device, non_blocking=True)
-        out = model(x)
+        out = self.model(x)
 
         pxz = Bernoulli(out['mean'])
         log_likelihood = pxz.log_prob(x).sum((1, 2, 3))
-        kl = kl_divergence(out['qz'], model.pz).sum(1)
+        kl = kl_divergence(out['qz'], self.model.pz).sum(1)
         elbo_sep = log_likelihood - kl
         elbo = elbo_sep.mean()
         loss = - elbo
@@ -157,7 +157,7 @@ class MnistExperiment(VIExperimentManager):
                    "Please use a larger batch.".format(n_img, x.shape[0]))
             raise RuntimeError(msg)
         x = x.to(self.device)
-        outputs = self.forward_pass(self.model, x)
+        outputs = self.forward_pass(x)
         x = x[:n_img]
         recons = outputs['out_sample'][:n_img]
         imgs = torch.stack([x.cpu(), recons.cpu()])

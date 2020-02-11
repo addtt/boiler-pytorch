@@ -207,7 +207,7 @@ class BaseExperimentManager:
         self.model.load(checkpoint_folder, self.device, step=step)
 
 
-    def forward_pass(self, model, x, y=None):
+    def forward_pass(self, x, y=None):
         """
         Simple single-pass model evaluation. It consists of a forward pass
         and computation of all necessary losses and metrics.
@@ -304,7 +304,7 @@ class VIExperimentManager(BaseExperimentManager):
         all_elbo_sep = torch.zeros(n_test, iw_samples)
         for batch_idx, (x, y) in enumerate(test_loader):
             for i in range(iw_samples):
-                outputs = self.forward_pass(self.model, x, y)
+                outputs = self.forward_pass(x, y)
 
                 # elbo_sep shape (batch size,)
                 i_start = batch_idx * args.test_batch_size
