@@ -154,6 +154,8 @@ class Trainer:
                 # Compute gradients (backward pass)
                 outputs['loss'].backward()
 
+                e.post_backward_callback()
+
                 # Add batch metrics to summarizers
                 metrics_dict = e.get_metrics_dict(outputs)
                 train_summarizers.add(metrics_dict)

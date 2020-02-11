@@ -215,6 +215,10 @@ class BaseExperimentManager:
         raise NotImplementedError
 
 
+    def post_backward_callback(self):
+        pass
+
+
     @staticmethod
     def print_train_log(step, epoch, summaries):
         raise NotImplementedError
