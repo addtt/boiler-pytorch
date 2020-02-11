@@ -8,7 +8,7 @@ share it across projects.
 ## Install
 
 ```shell script
-pip install git+https://github.com/addtt/boiler-pytorch.git
+pip install boilr
 ```
 
 ## Usage example/template
