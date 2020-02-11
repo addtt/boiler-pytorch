@@ -32,8 +32,8 @@ class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
     """
 
     def __init__(self, experiment_class, default_run=""):
-        eval_args = self._parse_args()
         self.default_run = default_run
+        eval_args = self._parse_args()
 
         use_cuda = not eval_args.no_cuda and torch.cuda.is_available()
         device = torch.device("cuda" if use_cuda else "cpu")
