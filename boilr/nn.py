@@ -111,3 +111,24 @@ def _pad_crop_img(x, size, mode):
         return nn.functional.pad(x, [dc1, dc2, dr1, dr2, 0, 0, 0, 0])
     elif mode == 'crop':
         return x[:, :, dr1:x_size[0] - dr2, dc1:x_size[1] - dc2]
+
+
+    def free_bits_kl(self, kl, batch_average=False):
+        """
+        Takes in the KL with shape (batch size, layers), returns the KL with
+        free bits (for optimization) with shape (layers,), which is the average
+        free-bits KL per layer in the current batch.
+
+        If batch_average is False (default), the free bits are per layer and
+        per batch element. Otherwise, the free bits are still per layer, but
+        are assigned on average to the whole batch. In both cases, the batch
+        average is returned, so it's simply a matter of doing mean(clamp(KL))
+        or clamp(mean(KL)).
+        """
+
+        assert kl.dim() == 2
+        if self.free_bits < 1e-4:
+            return kl.mean(0)
+        if batch_average:
+            return kl.mean(0).clamp(min=self.free_bits)
+        return kl.clamp(min=self.free_bits).mean(0)

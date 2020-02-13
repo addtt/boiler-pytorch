@@ -32,10 +32,7 @@ class Trainer:
             # Folder string = run name = resume argument
             folder_str = args.resume
             print("Resume from '{}'".format(folder_str))
-            print("[!] When resuming training, the optimizer's state is not restored")
-            warnings.warn("Tensorboard logs are stored in the same folder as "
-                          "the original run we're resuming. Not clear if this "
-                          "overwrites the previous records.")
+            warnings.warn("When resuming training, the optimizer's state is not restored")
 
             # Get all folder names to resume saving results
             result_folder = os.path.join('results', folder_str)
