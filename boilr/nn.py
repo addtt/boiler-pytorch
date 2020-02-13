@@ -113,7 +113,7 @@ def _pad_crop_img(x, size, mode):
         return x[:, :, dr1:x_size[0] - dr2, dc1:x_size[1] - dc2]
 
 
-def free_bits_kl(self, kl, batch_average=False):
+def free_bits_kl(kl, free_bits, batch_average=False, eps=1e-6):
     """
     Takes in the KL with shape (batch size, layers), returns the KL with
     free bits (for optimization) with shape (layers,), which is the average
@@ -127,8 +127,8 @@ def free_bits_kl(self, kl, batch_average=False):
     """
 
     assert kl.dim() == 2
-    if self.free_bits < 1e-4:
+    if free_bits < eps:
         return kl.mean(0)
     if batch_average:
-        return kl.mean(0).clamp(min=self.free_bits)
-    return kl.clamp(min=self.free_bits).mean(0)
+        return kl.mean(0).clamp(min=free_bits)
+    return kl.clamp(min=free_bits).mean(0)
