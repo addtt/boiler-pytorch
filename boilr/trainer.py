@@ -13,6 +13,7 @@ except ImportError as e:
     have_tensorboard = False
 from tqdm import tqdm
 
+from . import viz
 from .summarize import History, SummarizerCollection
 from .utils import set_rnd_seed, get_date_str
 
@@ -105,6 +106,7 @@ class Trainer:
                 with open(config_path, 'wb') as fd:
                     pickle.dump(args, fd)
 
+        viz.img_folder = self.img_folder
         experiment.setup(self.checkpoint_folder if resume else None)
 
         # Check everything is initialized properly

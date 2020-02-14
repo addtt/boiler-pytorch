@@ -134,10 +134,19 @@ def balanced_approx_factorization(x, ratio=1):
     # We want c/r to be approx equal to ratio, and r*c to be approx equal to x
     # ==> r = x/c = x/(ratio*r)
     # ==> r = sqrt(x/ratio) and c = sqrt(x*ratio)
-    c = np.ceil(np.sqrt(x * ratio))
-    r = np.ceil(x / c)
+    c = int(np.ceil(np.sqrt(x * ratio)))
+    r = int(np.ceil(x / c))
     return r, c
 
+
+def balanced_factorization(x):
+    assert type(x) == int or x.dtype == int
+    a = int(np.floor(np.sqrt(x)))
+    while True:
+        b = x / a
+        if b.is_integer():
+            return int(b), a
+        a += 1
 
 
 def clean_axes():
