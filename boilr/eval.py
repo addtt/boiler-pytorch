@@ -7,6 +7,7 @@ import torch
 import torch.utils.data
 import torch.utils.data
 
+from . import viz
 from .utils import get_date_str
 
 
@@ -58,6 +59,9 @@ class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
         self.img_folder = os.path.join(result_folder, 'imgs')
         os.makedirs(result_folder)
         os.makedirs(self.img_folder)
+
+        # Set img folder for viz module
+        viz.img_folder = self.img_folder
 
         # Load config
         config_path = path.join(checkpoint_folder, 'config.pkl')
