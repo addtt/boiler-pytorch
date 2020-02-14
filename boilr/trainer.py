@@ -131,6 +131,10 @@ class Trainer:
             for batch_idx, (x, y) in enumerate(train_loader):
 
                 step = e.model.global_step
+
+                if step >= e.max_steps:
+                    break
+
                 if step % e.args.test_log_interval == 0:
 
                     # Test model (unless we just resumed training)
@@ -195,6 +199,10 @@ class Trainer:
                 e.model.increment_global_step()
 
                 first_step = False
+
+            if step >= e.max_steps:
+                break
+
 
     def _test(self, epoch):
         e = self.experiment

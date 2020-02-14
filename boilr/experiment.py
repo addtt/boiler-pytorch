@@ -49,6 +49,8 @@ class BaseExperimentManager:
                           batch_size,
                           test_batch_size,
                           lr,
+                          max_epochs=1000000,
+                          max_steps=2147483647,
                           seed=54321,
                           log_interval=10000,
                           test_log_interval=10000,
@@ -104,6 +106,20 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='checkpoint_interval',
                             help='number of batches before saving model checkpoint')
+
+        parser.add_argument('--max-steps',
+                            type=int,
+                            default=max_steps,
+                            metavar='N',
+                            dest='max_steps',
+                            help='max number of training steps')
+
+        parser.add_argument('--max-epochs',
+                            type=int,
+                            default=max_epochs,
+                            metavar='N',
+                            dest='max_epochs',
+                            help='max number of training epochs')
 
         parser.add_argument('--nocuda',
                             action='store_true',
