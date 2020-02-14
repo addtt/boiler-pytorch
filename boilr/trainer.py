@@ -32,7 +32,11 @@ class Trainer:
             # Folder string = run name = resume argument
             folder_str = args.resume
             print("Resume from '{}'".format(folder_str))
-            warnings.warn("When resuming training, the optimizer's state is not restored")
+            msg = "When resuming training, the optimizer's state is not restored"
+            warnings.warn(msg)
+            msg = ("When resuming training, the relative time on tensorboard "
+                   "has a gap due to wall clock timestamps")
+            warnings.warn(msg)
 
             # Get all folder names to resume saving results
             result_folder = os.path.join('results', folder_str)
@@ -176,13 +180,13 @@ class Trainer:
 
                     # Add train summaries (smoothed) to history and dump it to
                     # file and to tensorboard if available
-                    self.train_history.add(summaries, step)
+                    self.train_history.add(summaries, step + 1)
                     if not e.args.dry_run:
                         with open(self.log_path, 'wb') as fd:
                             pickle.dump(self._history_dict(), fd)
                         if self.tb_writer is not None:
                             for k, v in summaries.items():
-                                self.tb_writer.add_scalar('train_' + k, v, step)
+                                self.tb_writer.add_scalar('train_' + k, v, step + 1)
 
                 # Optimization step
                 e.optimizer.step()
