@@ -201,7 +201,11 @@ class Trainer:
                 first_step = False
 
             if step >= e.args.max_steps:
+                print("Reached steps limit ({} steps)".format(e.args.max_steps))
                 break
+
+        if step < e.args.max_steps:
+            print("Reached epochs limit ({} epochs)".format(e.args.max_epochs))
 
 
     def _test(self, epoch):
