@@ -127,12 +127,12 @@ class Trainer:
         e.model.train()
 
         # Main loop
-        for epoch in range(1, e.max_epochs + 1):
+        for epoch in range(1, e.args.max_epochs + 1):
             for batch_idx, (x, y) in enumerate(train_loader):
 
                 step = e.model.global_step
 
-                if step >= e.max_steps:
+                if step >= e.args.max_steps:
                     break
 
                 if step % e.args.test_log_interval == 0:
@@ -200,7 +200,7 @@ class Trainer:
 
                 first_step = False
 
-            if step >= e.max_steps:
+            if step >= e.args.max_steps:
                 break
 
 

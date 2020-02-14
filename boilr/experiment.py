@@ -29,7 +29,6 @@ class BaseExperimentManager:
         self.model = None
         self.optimizer = None
         self.args = args
-        self.max_epochs = 100000   # TODO no limit for now
         if args is None:
             self.args = self._parse_args()
         self.run_description = self._make_run_description(self.args)
