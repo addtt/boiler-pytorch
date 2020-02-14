@@ -18,5 +18,4 @@ class DatasetManager(BaseDatasetManager):
 
         train_set = MNIST(path, train=True, download=True, transform=ToTensor())
         test_set = MNIST(path, train=False, transform=ToTensor())
-        print(train_set)
         return train_set, test_set
