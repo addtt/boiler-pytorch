@@ -38,9 +38,11 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'numpy',
-        'torch',
-        'matplotlib',
+        'numpy>=1.17',
+        'torch>=1.4',
+        'torchvision>=0.5',
+        'matplotlib>=3.1',
         'tqdm',
+        'pillow>=7.0',
     ]
 )
