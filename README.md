@@ -26,12 +26,13 @@ pip install -r requirements.txt
 CUDA_VISIBLE_DEVICES=0 python example.py
 ```
 
-Requirements:
+Tested with:
 
-- `python 3.7`
-- `numpy 1.17.4`
+- `python 3.7.6`
+- `numpy 1.18.1`
 - `matplotlib 3.1.2`
 - `torch 1.4.0`
 - `torchvision 0.5.0`
 - `tensorboard 2.1.0` (it also works without, but it won't save tensorboard logs)
-- `tqdm 4.40.2`
+- `pillow 7.0`
+- `tqdm 4.41.1`
