@@ -8,12 +8,26 @@ from boilr.utils import balanced_approx_factorization, img_grid_pad_value
 
 img_folder = None
 
+def _unique_filename(fname, extension):
+    def exists(fname):
+        return os.path.exists(fname + '.' + extension)
 
-def plot_imgs(imgs, name=None, extension='png', colorbar=True):
+    if not exists(fname):
+        return fname
+    for i in range(10000):
+        t = fname + '_' + str(i)
+        if not exists(t):
+            return t
+    raise RuntimeError("too many files ({})".format(i))
+
+def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
     """
     Plots collection of 1-channel images (as 3D tensor, or 4D tensor with size
     1 on the 2nd dimension) and saves it as png. If any image extends beyond
     [0, 1], all are normalized such that the minimum and maximum are 0 and 1.
+
+    If overwrite is False, it automatically appends an integer to the filename
+    to make it unique.
     """
 
     if imgs.dim() == 4 and imgs.size(1) == 1:
@@ -24,8 +38,11 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True):
         raise RuntimeError(msg)
     if img_folder is None:
         raise RuntimeError("Image folder not set")
-    fname = name.replace(' ', '_') + '.' + extension
+    fname = name.replace(' ', '_')
     fname = os.path.join(img_folder, fname)
+    if not overwrite:
+        fname = _unique_filename(fname, extension)
+    fname = fname + '.' + extension
     imgs = imgs.detach().cpu().unsqueeze(1)   # (N, 1, H, W)
     n_imgs = imgs.size(0)
     _, c = balanced_approx_factorization(n_imgs)  # grid arrangement
