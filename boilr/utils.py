@@ -2,7 +2,6 @@ import datetime
 import random
 from collections import OrderedDict
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.utils.data
@@ -35,16 +34,15 @@ def print_num_params(model, max_depth=None):
     print("---------\n")
 
 
-def set_rnd_seed(seed):
+def set_rnd_seed(seed, aggressive=False):
     torch.manual_seed(seed)
-    # torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     random.seed(seed)
 
     # The two lines below might slow down training
-    # torch.backends.cudnn.deterministic = True
-    # torch.backends.cudnn.benchmark = False
+    if aggressive:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 
 def get_date_str():
@@ -89,103 +87,3 @@ def named_leaf_modules(module):
         if name not in last_name:
             last_name = name
             yield name, l
-
-
-############################
-### VIZ
-
-def img_grid_pad_value(imgs, thresh=.2):
-    """
-    Hack to visualize boundaries between images with torchvision's save_image().
-    If the median border value of all images is below the threshold, use white,
-    otherwise black (which is the default)
-    :param imgs: 4d tensor
-    :param thresh: threshold in (0, 1)
-    :return: padding value
-    """
-
-    assert imgs.dim() == 4
-    imgs = imgs.clamp(min=0., max=1.)
-    assert 0. < thresh < 1.
-
-    imgs = imgs.mean(1)  # reduce to 1 channel
-    h = imgs.size(1)
-    w = imgs.size(2)
-    borders = list()
-    borders.append(imgs[:, 0].flatten())
-    borders.append(imgs[:, h - 1].flatten())
-    borders.append(imgs[:, 1:h - 1, 0].flatten())
-    borders.append(imgs[:, 1:h - 1, w - 1].flatten())
-    borders = torch.cat(borders)
-    if torch.median(borders) < thresh:
-        return 1.0
-    return 0.0
-
-
-def balanced_approx_factorization(x, ratio=1):
-    """
-    :param x:
-    :param ratio: ratio columns/rows
-    :return:
-    """
-
-    assert type(x) == int or x.dtype == int
-
-    # We want c/r to be approx equal to ratio, and r*c to be approx equal to x
-    # ==> r = x/c = x/(ratio*r)
-    # ==> r = sqrt(x/ratio) and c = sqrt(x*ratio)
-    c = int(np.ceil(np.sqrt(x * ratio)))
-    r = int(np.ceil(x / c))
-    return r, c
-
-
-def balanced_factorization(x):
-    assert type(x) == int or x.dtype == int
-    a = int(np.floor(np.sqrt(x)))
-    while True:
-        b = x / a
-        if b.is_integer():
-            return int(b), a
-        a += 1
-
-
-def clean_axes():
-    plt.gca().tick_params(
-        axis='both',  # changes apply to the x-axis
-        which='both',  # both major and minor ticks
-        left=False,  # ticks along the left edge are off
-        right=False,
-        bottom=False,
-        top=False,
-        labelleft=False,  # labels along the left edge are off
-        labelbottom=False)
-
-
-############################
-# Saving model activations
-
-
-def save_activation_hook(ord_dict, name):
-    def hook(model, inp, ret):
-        if isinstance(ret, tuple):
-            try:
-                ret = torch.cat(ret, dim=1)
-            except TypeError:
-                ret = ret[0]
-            except RuntimeError as e:
-                print("WARNING:", e)
-                return
-        ord_dict[name] = ret.detach()
-    return hook
-
-
-def set_up_saving_all_activations(model):
-    all_activations = OrderedDict()
-    for module_name, module in named_leaf_modules(model):
-        module.register_forward_hook(save_activation_hook(all_activations, module_name))
-    return all_activations
-
-
-if __name__ == '__main__':
-    # Test
-    img_grid_pad_value(torch.rand(6, 3, 32, 32), thresh=.3)

@@ -8,7 +8,7 @@ from torch.distributions.kl import kl_divergence
 from torchvision.utils import save_image
 
 from boilr import VIExperimentManager
-from boilr.utils import img_grid_pad_value
+from boilr.viz import img_grid_pad_value
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
