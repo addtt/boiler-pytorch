@@ -64,11 +64,17 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
     grid = make_grid(imgs, nrow=c, pad_value=pad_value, normalize=False)
 
     if colorbar:
+        # make_grid made it RGB, now take one channel only
+        grid = grid[0]
+
         # Rescale images to original interval (now including the padding)
-        grid = grid[0] * (high - low) + low
+        if normalize:
+            grid = grid * (high - low) + low
 
         # Save grid of images with colorbar
-        plt.imshow(grid, vmin=min(low, 0.), vmax=max(high, 1.), cmap='gray')
+        vmin = low if normalize else 0.
+        vmax = high if normalize else 1.
+        plt.imshow(grid, vmin=vmin, vmax=vmax, cmap='gray')
         plt.colorbar()
         plt.title(name)
         plt.savefig(fname)
@@ -89,8 +95,21 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
 # Test
 if __name__ == '__main__':
     img_folder = ''
+
     low = -20.
     high = 30.
+    imgs = torch.rand(4, 1, 8, 8) * (high - low) + low
+    plot_imgs(imgs, name='test_colorbar_false', colorbar=False)
+    plot_imgs(imgs, name='test_colorbar_true', colorbar=True)
+
+    low = .7
+    high = 2.
+    imgs = torch.rand(4, 1, 8, 8) * (high - low) + low
+    plot_imgs(imgs, name='test_colorbar_false', colorbar=False)
+    plot_imgs(imgs, name='test_colorbar_true', colorbar=True)
+
+    low = .5
+    high = .9
     imgs = torch.rand(4, 1, 8, 8) * (high - low) + low
     plot_imgs(imgs, name='test_colorbar_false', colorbar=False)
     plot_imgs(imgs, name='test_colorbar_true', colorbar=True)
