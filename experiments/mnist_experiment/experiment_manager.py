@@ -3,8 +3,6 @@ import os
 
 import torch
 from torch import optim
-from torch.distributions import Bernoulli
-from torch.distributions.kl import kl_divergence
 from torchvision.utils import save_image
 
 from boilr import VIExperimentManager
@@ -51,11 +49,7 @@ class MnistExperiment(VIExperimentManager):
 
         x = x.to(self.device, non_blocking=True)
         out = self.model(x)
-
-        pxz = Bernoulli(out['mean'])
-        log_likelihood = pxz.log_prob(x).sum((1, 2, 3))
-        kl = kl_divergence(out['qz'], self.model.pz).sum(1)
-        elbo_sep = log_likelihood - kl
+        elbo_sep = out['elbo']
         elbo = elbo_sep.mean()
         loss = - elbo
 
@@ -65,8 +59,8 @@ class MnistExperiment(VIExperimentManager):
             'loss': loss,
             'elbo_sep': elbo_sep,
             'elbo': elbo,
-            'recons': -log_likelihood.mean(),
-            'kl': kl.mean(),
+            'recons': out['nll'].mean(),
+            'kl': out['kl'].mean(),
         }
         return out
 

@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torch.distributions import Normal
+from torch.distributions import Normal, kl_divergence
 
 from boilr import BaseGenerativeModel
 
@@ -34,18 +34,21 @@ class MnistVAE(BaseGenerativeModel):
 
 
     def forward(self, x):
-        sz = x.size()
-        x = x.view(x.size(0), -1)
-        mu, lv = torch.chunk(self.encoder(x), 2, dim=1)
+        x_flat = x.view(x.size(0), -1)
+        mu, lv = torch.chunk(self.encoder(x_flat), 2, dim=1)
         qz = Normal(mu, (lv / 2).exp())
         z = qz.rsample()
-        mean = self.decoder(z).view(sz)
+        mean = self.decoder(z).view_as(x)
         pxz = Normal(mean, data_std)
+        nll = -pxz.log_prob(x).sum((1, 2, 3))
+        kl = kl_divergence(qz, self.pz).sum(1)
+        elbo = -nll - kl
         return {
             'mean': mean,
             'sample': pxz.sample(),
-            'z': z,
-            'qz': qz,
+            'nll': nll,
+            'kl': kl,
+            'elbo': elbo,
         }
 
 
