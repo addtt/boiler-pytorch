@@ -30,7 +30,7 @@ Tested with:
 
 - `python 3.7.6`
 - `numpy 1.18.1`
-- `matplotlib 3.1.2`
+- `matplotlib 3.1.3`
 - `torch 1.4.0`
 - `torchvision 0.5.0`
 - `tensorboard 2.1.0` (it also works without, but it won't save tensorboard logs)

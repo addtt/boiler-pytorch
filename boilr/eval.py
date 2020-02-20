@@ -54,10 +54,10 @@ class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
         checkpoint_folder = path.join('checkpoints', eval_args.load)
 
         # Add date string and create folder on evaluation_results
-        result_folder = path.join('evaluation_results',
-                                  date_str + '_' + eval_args.load)
-        self.img_folder = os.path.join(result_folder, 'imgs')
-        os.makedirs(result_folder)
+        self.result_folder = path.join('evaluation_results',
+                                       date_str + '_' + eval_args.load)
+        self.img_folder = os.path.join(self.result_folder, 'imgs')
+        os.makedirs(self.result_folder)
         os.makedirs(self.img_folder)
 
         # Set img folder for viz module
