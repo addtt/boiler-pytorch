@@ -14,8 +14,8 @@ class DatasetManager(BaseDatasetManager):
     - color_ch: number of color channels
     """
 
-    def make_datasets(self, **kwargs):
-
+    @classmethod
+    def make_datasets(cls, cfg, **kwargs):
         train_set = MNIST(path, train=True, download=True, transform=ToTensor())
         test_set = MNIST(path, train=False, transform=ToTensor())
         return train_set, test_set
