@@ -29,10 +29,10 @@ CUDA_VISIBLE_DEVICES=0 python example.py
 Tested with:
 
 - `python 3.7.6`
-- `numpy 1.18.1`
-- `matplotlib 3.1.3`
+- `numpy 1.18.2`
+- `matplotlib 3.2.1`
 - `torch 1.4.0`
 - `torchvision 0.5.0`
-- `tensorboard 2.1.0` (it also works without, but it won't save tensorboard logs)
-- `pillow 7.0`
-- `tqdm 4.41.1`
+- `tensorboard 2.2.0` (it also works without, but it won't save tensorboard logs)
+- `pillow 7.1.1`
+- `tqdm 4.45.0`

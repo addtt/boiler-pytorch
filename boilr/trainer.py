@@ -182,7 +182,7 @@ class Trainer:
                     summaries = train_summarizers.get_all(reset=True)
 
                     # Print summaries
-                    e.print_train_log(step + 1, epoch, summaries)
+                    print(e.train_log_str(summaries, step + 1, epoch))
 
                     # Add train summaries (smoothed) to history and dump it to
                     # file and to tensorboard if available
@@ -226,7 +226,7 @@ class Trainer:
         e.additional_testing(self.img_folder)
 
         # Print log string with test results (experiment-specific)
-        e.print_test_log(summaries, step, epoch)
+        print(e.test_log_str(summaries, step, epoch))
 
         # Save summaries to history
         self.test_history.add(summaries, step)

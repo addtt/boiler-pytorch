@@ -1,3 +1,5 @@
+from numbers import Number
+
 import numpy as np
 import torch
 from tqdm import tqdm
@@ -234,23 +236,52 @@ class BaseExperimentManager:
         pass
 
 
-    @staticmethod
-    def print_train_log(step, epoch, summaries):
-        raise NotImplementedError
-
-
-    @staticmethod
-    def print_test_log(summaries, step=None, epoch=None):
-        raise NotImplementedError
-
-
-    @staticmethod
-    def get_metrics_dict(results):
+    @classmethod
+    def get_metrics_dict(cls, results):
         """
         Given a dict of results, return a dict of metrics to be given to
         summarizers. Keys are also used as names for tensorboard logging.
+
+        In the base implementation, keys are simply copyed and used as names
+        for tensorboard.
+
+        Only scalars accepted, non-scalars are discarded. Actually, anything
+        that either is a scalar or has the method item(). That should include
+        Python scalars, numpy scalars, torch scalars, numpy and torch
+        arrays/tensors with one element.
+
+        Override to customize translation from results to dictionary of
+        scalar metrics.
         """
-        raise NotImplementedError
+        metrics_dict = {}
+        for k in results:
+            x = results[k]
+            if isinstance(x, Number):
+                metrics_dict[k] = x
+                continue
+            try:
+                metrics_dict[k] = x.item()
+            except (AttributeError, ValueError):  # is this enough?
+                pass
+        return metrics_dict
+
+
+    @classmethod
+    def train_log_str(cls, summaries, step, epoch=None):
+        s = "       [step {}]".format(step)
+        for k in summaries:
+            s += "  {key}={value:.5g}".format(key=k, value=summaries[k])
+        return s
+
+
+    @classmethod
+    def test_log_str(cls, summaries, step, epoch=None):
+        s = "       "
+        if epoch is not None:
+            s += "[step {}, epoch {}]".format(step, epoch)
+        for k in summaries:
+            s += "  {key}={value:.5g}".format(key=k, value=summaries[k])
+        return s
 
 
     def test_procedure(self, **kwargs):

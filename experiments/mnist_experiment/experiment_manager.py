@@ -58,59 +58,11 @@ class MnistExperiment(VIExperimentManager):
             'out_mean': out['mean'],
             'loss': loss,
             'elbo_sep': elbo_sep,
-            'elbo': elbo,
-            'recons': out['nll'].mean(),
-            'kl': out['kl'].mean(),
+            'elbo/elbo': elbo,
+            'elbo/recons': out['nll'].mean(),
+            'elbo/kl': out['kl'].mean(),
         }
         return out
-
-
-    @staticmethod
-    def print_train_log(step, epoch, summaries):
-        s = ("       [step {step}]   loss: {loss:.5g}   ELBO: {elbo:.5g}   "
-             "recons: {recons:.3g}   KL: {kl:.3g}")
-        s = s.format(
-            step=step,
-            loss=summaries['loss/loss'],
-            elbo=summaries['elbo/elbo'],
-            recons=summaries['elbo/recons'],
-            kl=summaries['elbo/kl'],
-        )
-        print(s)
-
-
-    @staticmethod
-    def print_test_log(summaries, step=None, epoch=None):
-        log_string = "       "
-        if epoch is not None:
-            log_string += "[step {}, epoch {}]   ".format(step, epoch)
-        s = "ELBO {elbo:.5g}   recons: {recons:.3g}   KL: {kl:.3g}"
-        log_string += s.format(
-            elbo=summaries['elbo/elbo'],
-            recons=summaries['elbo/recons'],
-            kl=summaries['elbo/kl'])
-        ll_key = None
-        for k in summaries.keys():
-            if k.find('elbo_IW') > -1:
-                ll_key = k
-                iw_samples = k.split('_')[-1]
-                break
-        if ll_key is not None:
-            log_string += "   marginal log-likelihood ({}) {:.5g}".format(
-                iw_samples, summaries[ll_key])
-
-        print(log_string)
-
-
-    @staticmethod
-    def get_metrics_dict(results):
-        metrics_dict = {
-            'loss/loss': results['loss'].item(),
-            'elbo/elbo': results['elbo'].item(),
-            'elbo/recons': results['recons'].item(),
-            'elbo/kl': results['kl'].item(),
-        }
-        return metrics_dict
 
 
     def additional_testing(self, img_folder):

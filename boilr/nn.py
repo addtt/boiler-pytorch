@@ -36,12 +36,19 @@ class CropImage(nn.Module):
 
 
 class Reshape(nn.Module):
-    def __init__(self, *args):
+    def __init__(self, *args, implicit_batch=True, allow_copy=False):
         super().__init__()
         self.shape = args
+        self.implicit_batch = implicit_batch
+        self.allow_copy = allow_copy
 
     def forward(self, x):
-        return x.view(self.shape)
+        shp = self.shape
+        if self.implicit_batch:
+            shp = (x.size(0), *shp)
+        if self.allow_copy:
+            return x.reshape(shp)
+        return x.view(shp)
 
 
 class PrintShape(nn.Module):
