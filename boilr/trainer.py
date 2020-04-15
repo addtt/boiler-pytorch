@@ -147,7 +147,8 @@ class Trainer:
                     # Save model checkpoint (unless we just started/resuming training)
                     if not first_step and step % e.args.checkpoint_every == 0:
                         print("* saving model checkpoint at step {}".format(step))
-                        e.model.checkpoint(self.checkpoint_folder)
+                        e.model.checkpoint(self.checkpoint_folder,
+                                           e.args.keep_checkpoint_max)
 
                     # Restart progress bar
                     progress = tqdm(total=e.args.test_log_every, desc='train')

@@ -60,6 +60,7 @@ class BaseExperimentManager:
                           train_log_every=10000,
                           test_log_every=10000,
                           checkpoint_every=100000,
+                          keep_checkpoint_max=3,
                           resume="",
                           ):
 
@@ -114,6 +115,14 @@ class BaseExperimentManager:
                             dest='checkpoint_every',
                             help='save model checkpoint every this number of '
                                  'training steps')
+
+        parser.add_argument('--keep-checkpoint-max',
+                            type=int,
+                            default=keep_checkpoint_max,
+                            metavar='N',
+                            dest='keep_checkpoint_max',
+                            help='keep at most this number of most recent '
+                                 'model checkpoints')
 
         parser.add_argument('--max-steps',
                             type=int,

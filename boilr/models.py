@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from .utils import get_module_device, checkpoints_in_folder
-
+import os
 
 class BaseModel(nn.Module):
 
@@ -19,9 +19,27 @@ class BaseModel(nn.Module):
     def get_device(self):
         return get_module_device(self)
 
-    def checkpoint(self, ckpt_folder):
+    def checkpoint(self, ckpt_folder, max_ckpt=None):
+        # Get checkpoints before saving the new one (is torch.save synchronous?)
+        filenames, _ = checkpoints_in_folder(ckpt_folder)
+
+        # Save checkpoint
         path = join(ckpt_folder, "model_{}.pt".format(self.global_step))
         torch.save(self.state_dict(), path)
+
+        # Return if we're supposed to keep all checkpoints
+        if max_ckpt is None or max_ckpt == -1:
+            return
+
+        # Delete all old checkpoints except for the last max_ckpt-1
+        if len(filenames) < max_ckpt - 1:
+            return
+        for i in range(len(filenames) - max_ckpt + 1):
+            path = os.path.join(ckpt_folder, filenames[i])
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
     def load(self, ckpt_folder, device=None, step=None):
         if step is None:

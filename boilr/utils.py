@@ -103,7 +103,8 @@ def checkpoints_in_folder(folder):
     """
     Find checkpoint files in the speficied folder, return a list of file names
     and a list of integers corresponding to the time steps when the checkpoints
-    were saved. These lists are not necessarily sorted.
+    were saved. These lists have the same length, they have a one-to-one
+    correspondence, and they are sorted by number.
 
     Parameters
     ----------
@@ -112,17 +113,22 @@ def checkpoints_in_folder(folder):
     Returns
     -------
     filenames: list of str
+        File names of checkpoints. The full path is given by joining the
+        input argument folder with these file names.
     numbers: list of int
 
     """
 
     def is_checkpoint_file(f):
         # TODO use regex properly and maybe get number directly here
-        return (os.path.isfile(os.path.join(folder, f)) and
+        full_path = os.path.join(folder, f)
+        return (os.path.isfile(full_path) and
                 f.startswith("model_") and
                 f.endswith('.pt'))
 
     filenames = [f for f in os.listdir(folder) if is_checkpoint_file(f)]
     regex = re.compile(r'\d+')
-    numbers = [int(regex.search(n).group(0)) for n in filenames]
+    numbers = list([int(regex.search(n).group(0)) for n in filenames])
+    assert len(filenames) == len(numbers)
+    filenames = list([filenames[i] for i in np.argsort(numbers)])
     return filenames, numbers
