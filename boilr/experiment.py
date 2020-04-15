@@ -1,3 +1,4 @@
+import argparse
 from numbers import Number
 
 import numpy as np
@@ -31,12 +32,15 @@ class BaseExperimentManager:
         self.model = None
         self.optimizer = None
         self.args = args
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            allow_abbrev=False)
         if args is None:
-            self.args = self._parse_args()
+            self.args = self._parse_args(parser)
         self.run_description = self._make_run_description(self.args)
 
 
-    def _parse_args(self):
+    def _parse_args(self, parser):
         """
         Parse command-line arguments defining experiment settings.
 

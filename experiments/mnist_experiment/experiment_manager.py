@@ -1,4 +1,3 @@
-import argparse
 import os
 
 import torch
@@ -115,15 +114,14 @@ class MnistExperiment(VIExperimentManager):
         save_image(imgs, fname, nrow=n, pad_value=pad)
 
 
-    def _parse_args(self):
+    def _parse_args(self, parser):
         """
         Parse command-line arguments defining experiment settings.
 
+        :param: parser
+
         :return: args: argparse.Namespace with experiment settings
         """
-        parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            allow_abbrev=False)
 
         self.add_required_args(parser,
 
