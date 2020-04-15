@@ -51,15 +51,15 @@ class BaseExperimentManager:
 
     def add_required_args(self,
                           parser,
-                          batch_size,
-                          test_batch_size,
-                          lr,
+                          batch_size=None,
+                          test_batch_size=None,
+                          lr=None,
                           max_epochs=1000000,
                           max_steps=2147483647,
                           seed=54321,
-                          log_interval=10000,
-                          test_log_interval=10000,
-                          checkpoint_interval=100000,
+                          train_log_every=10000,
+                          test_log_every=10000,
+                          checkpoint_every=100000,
                           resume="",
                           ):
 
@@ -91,26 +91,29 @@ class BaseExperimentManager:
                             dest='seed',
                             help='random seed')
 
-        parser.add_argument('--tr-log-interv',
+        parser.add_argument('--tr-log-every',
                             type=int,
-                            default=log_interval,
+                            default=train_log_every,
                             metavar='N',
-                            dest='log_interval',
-                            help='number of batches before logging train status')
+                            dest='train_log_every',
+                            help='log training metrics every this number of '
+                                 'training steps')
 
-        parser.add_argument('--ts-log-interv',
+        parser.add_argument('--ts-log-every',
                             type=int,
-                            default=test_log_interval,
+                            default=test_log_every,
                             metavar='N',
-                            dest='test_log_interval',
-                            help='number of batches before logging test status')
+                            dest='test_log_every',
+                            help='log test metrics every this number of '
+                                 'training steps')
 
-        parser.add_argument('--ckpt-interv',
+        parser.add_argument('--checkpoint-every',
                             type=int,
-                            default=checkpoint_interval,
+                            default=checkpoint_every,
                             metavar='N',
-                            dest='checkpoint_interval',
-                            help='number of batches before saving model checkpoint')
+                            dest='checkpoint_every',
+                            help='save model checkpoint every this number of '
+                                 'training steps')
 
         parser.add_argument('--max-steps',
                             type=int,
@@ -349,8 +352,8 @@ class VIExperimentManager(BaseExperimentManager):
         # If given, use the given number.
         if iw_samples is None:
             iw_samples = 1
-            if step % args.loglik_interval == 0 and step > 0:
-                iw_samples = args.loglik_samples
+            if step % args.loglikelihood_every == 0 and step > 0:
+                iw_samples = args.loglikelihood_samples
 
         # Setup
         summarizers = SummarizerCollection(mode='sum')
@@ -391,26 +394,25 @@ class VIExperimentManager(BaseExperimentManager):
 
     def add_required_args(self,
                           parser,
-                          *args,
-                          ll_every=50000,
-                          loglik_samples=100,
+                          loglikelihood_every=50000,
+                          loglikelihood_samples=100,
                           **kwargs
                           ):
 
-        super().add_required_args(parser, *args, **kwargs)
+        super().add_required_args(parser, **kwargs)
 
-        parser.add_argument('--ll-interv',
+        parser.add_argument('--ll-every',
                             type=int,
-                            default=ll_every,
+                            default=loglikelihood_every,
                             metavar='N',
-                            dest='loglik_interval',
-                            help='number of batches before evaluating '
-                                 'log likelihood')
+                            dest='loglikelihood_every',
+                            help='evaluate log likelihood every this number '
+                                 'of training steps')
 
         parser.add_argument('--ll-samples',
                             type=int,
-                            default=loglik_samples,
+                            default=loglikelihood_samples,
                             metavar='N',
-                            dest='loglik_samples',
-                            help='number of importance samples to evaluate '
-                                 'log likelihood')
+                            dest='loglikelihood_samples',
+                            help='number of importance-weighted samples to '
+                                 'evaluate log likelihood')

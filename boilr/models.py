@@ -1,12 +1,10 @@
-import os
-import re
 from os.path import join
 
 import numpy as np
 import torch
 from torch import nn
 
-from .utils import get_module_device
+from .utils import get_module_device, checkpoints_in_folder
 
 
 class BaseModel(nn.Module):
@@ -27,9 +25,7 @@ class BaseModel(nn.Module):
 
     def load(self, ckpt_folder, device=None, step=None):
         if step is None:
-            filenames = list(filter(lambda n: "model_" in n, os.listdir(ckpt_folder)))
-            regex = re.compile(r'\d+')
-            numbers = [int(regex.search(n).group(0)) for n in filenames]
+            filenames, numbers = checkpoints_in_folder(ckpt_folder)
             ckpt_name = filenames[np.argmax(numbers)]   # get latest checkpoint
             step = max(numbers)
         else:

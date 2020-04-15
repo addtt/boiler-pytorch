@@ -64,7 +64,7 @@ class Trainer:
                 self.train_history = History(history['train'])
                 self.test_history = History(history['test'])
 
-        assert args.checkpoint_interval % args.test_log_interval == 0
+        assert args.checkpoint_every % args.test_log_every == 0
 
 
         # Pick device (cpu/cuda)
@@ -122,7 +122,7 @@ class Trainer:
         e = self.experiment
         train_loader = e.dataloaders.train
         train_summarizers = SummarizerCollection(
-            mode='moving_average', ma_length=1000)
+            mode='moving_average', ma_length=1000)  # TODO use boilr options
         progress = None
 
         # Training mode
@@ -137,7 +137,7 @@ class Trainer:
                 if step >= e.args.max_steps:
                     break
 
-                if step % e.args.test_log_interval == 0:
+                if step % e.args.test_log_every == 0:
 
                     # Test model (unless we just resumed training)
                     if not first_step or step == 0:
@@ -145,12 +145,12 @@ class Trainer:
                             self._test(epoch)
 
                     # Save model checkpoint (unless we just started/resuming training)
-                    if not first_step and step % e.args.checkpoint_interval == 0:
+                    if not first_step and step % e.args.checkpoint_every == 0:
                         print("* saving model checkpoint at step {}".format(step))
                         e.model.checkpoint(self.checkpoint_folder)
 
                     # Restart progress bar
-                    progress = tqdm(total=e.args.test_log_interval, desc='train')
+                    progress = tqdm(total=e.args.test_log_every, desc='train')
 
                 # Reset gradients
                 e.optimizer.zero_grad()
@@ -171,11 +171,11 @@ class Trainer:
                 progress.update()
 
                 # Close progress bar if test occurs at next loop iteration
-                if (step + 1) % e.args.test_log_interval == 0:
+                if (step + 1) % e.args.test_log_every == 0:
                     if progress is not None:
                         progress.close()
 
-                if (step + 1) % e.args.log_interval == 0:
+                if (step + 1) % e.args.train_log_every == 0:
                     # step+1 because we already did a forward/backward step
 
                     # Get moving average of training metrics and reset summarizers

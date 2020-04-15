@@ -1,10 +1,13 @@
 import datetime
+import os
 import random
+import re
 from collections import OrderedDict
 
 import numpy as np
 import torch
 import torch.utils.data
+
 from .options import get_options
 
 __sentinel = object()
@@ -94,3 +97,32 @@ def named_leaf_modules(module):
         if name not in last_name:
             last_name = name
             yield name, l
+
+
+def checkpoints_in_folder(folder):
+    """
+    Find checkpoint files in the speficied folder, return a list of file names
+    and a list of integers corresponding to the time steps when the checkpoints
+    were saved. These lists are not necessarily sorted.
+
+    Parameters
+    ----------
+    folder: str
+
+    Returns
+    -------
+    filenames: list of str
+    numbers: list of int
+
+    """
+
+    def is_checkpoint_file(f):
+        # TODO use regex properly and maybe get number directly here
+        return (os.path.isfile(os.path.join(folder, f)) and
+                f.startswith("model_") and
+                f.endswith('.pt'))
+
+    filenames = [f for f in os.listdir(folder) if is_checkpoint_file(f)]
+    regex = re.compile(r'\d+')
+    numbers = [int(regex.search(n).group(0)) for n in filenames]
+    return filenames, numbers

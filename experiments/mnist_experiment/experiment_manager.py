@@ -130,14 +130,14 @@ class MnistExperiment(VIExperimentManager):
                                test_batch_size=1000,
                                lr=1e-3,
                                seed=54321,
-                               log_interval=1000,
-                               test_log_interval=1000,
-                               checkpoint_interval=10000,
+                               train_log_every=1000,
+                               test_log_every=1000,
+                               checkpoint_every=10000,
                                resume="",
 
                                # VI-specific
-                               ll_every=50000,
-                               loglik_samples=100,)
+                               loglikelihood_every=50000,
+                               loglikelihood_samples=100, )
 
         parser.add_argument('--wd',
                             type=float,
@@ -147,7 +147,7 @@ class MnistExperiment(VIExperimentManager):
 
         args = parser.parse_args()
 
-        assert args.loglik_interval % args.test_log_interval == 0
+        assert args.loglikelihood_every % args.test_log_every == 0
 
         return args
 
