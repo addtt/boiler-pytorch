@@ -5,9 +5,16 @@ from collections import OrderedDict
 import numpy as np
 import torch
 import torch.utils.data
+from .options import get_options
 
+__sentinel = object()
 
-def print_num_params(model, max_depth=None):
+def print_num_params(model, max_depth=__sentinel):
+
+    if max_depth is __sentinel:
+        max_depth = get_options('model_print_depth')
+    assert max_depth is None or isinstance(max_depth, int)
+
     sep = '.'  # string separator in parameter name
     print("\n--- Trainable parameters:")
     num_params_tot = 0
@@ -29,7 +36,7 @@ def print_num_params(model, max_depth=None):
         num_params_dict[prefix] += num_params
         num_params_tot += num_params
     for n, n_par in num_params_dict.items():
-        print("{:7d}  {}".format(n_par, n))
+        print("{:8d}  {}".format(n_par, n))
     print("  - Total trainable parameters:", num_params_tot)
     print("---------\n")
 

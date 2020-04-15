@@ -5,11 +5,13 @@ import torch
 from torch import optim
 from torchvision.utils import save_image
 
+import boilr
 from boilr import VIExperimentManager
 from boilr.viz import img_grid_pad_value
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
+boilr.set_options(model_print_depth=2)
 
 class MnistExperiment(VIExperimentManager):
     """

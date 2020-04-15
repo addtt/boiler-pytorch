@@ -204,7 +204,7 @@ class BaseExperimentManager:
         # Model
         print("Creating model...")
         self.model = self.make_model().to(self.device)
-        print_num_params(self.model, max_depth=3)
+        print_num_params(self.model)
 
         # Load weights if resuming training
         if resume:
