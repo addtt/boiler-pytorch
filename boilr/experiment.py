@@ -37,6 +37,7 @@ class BaseExperimentManager:
             allow_abbrev=False)
         if args is None:
             self.args = self._parse_args(parser)
+        self._check_args(self.args)
         self.run_description = self._make_run_description(self.args)
 
 
@@ -170,6 +171,11 @@ class BaseExperimentManager:
                             default=resume,
                             dest='resume',
                             help="load the run with this name and resume training")
+
+
+    @classmethod
+    def _check_args(cls, args):
+        assert args.test_imgs_every % args.test_log_every == 0
 
 
     @staticmethod
@@ -438,3 +444,8 @@ class VIExperimentManager(BaseExperimentManager):
                             dest='loglikelihood_samples',
                             help='number of importance-weighted samples to '
                                  'evaluate log likelihood')
+
+    @classmethod
+    def _check_args(cls, args):
+        assert args.loglikelihood_every % args.test_log_every == 0
+        super(VIExperimentManager, cls)._check_args(args)

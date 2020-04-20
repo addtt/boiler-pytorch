@@ -148,10 +148,6 @@ class MnistExperiment(VIExperimentManager):
 
         args = parser.parse_args()
 
-        # TODO these assertions should be downstream within boilr
-        assert args.loglikelihood_every % args.test_log_every == 0
-        assert args.test_imgs_every % args.test_log_every == 0
-
         return args
 
     @staticmethod
