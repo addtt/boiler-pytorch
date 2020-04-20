@@ -132,7 +132,6 @@ class MnistExperiment(VIExperimentManager):
                                seed=54321,
                                train_log_every=1000,
                                test_log_every=1000,
-                               test_imgs_every=2000,
                                checkpoint_every=10000,
                                resume="",
 

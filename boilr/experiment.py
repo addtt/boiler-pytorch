@@ -60,7 +60,6 @@ class BaseExperimentManager:
                           seed=54321,
                           train_log_every=10000,
                           test_log_every=10000,
-                          test_imgs_every=10000,
                           checkpoint_every=100000,
                           keep_checkpoint_max=3,
                           resume="",
@@ -112,11 +111,12 @@ class BaseExperimentManager:
 
         parser.add_argument('--ts-img-every',
                             type=int,
-                            default=test_imgs_every,
                             metavar='N',
                             dest='test_imgs_every',
-                            help='save test images every this number of '
-                                 'training steps')
+                            help="save test images every this number of "
+                                 "training steps. It must be a multiple of "
+                                 "'--ts-log-every'. Default: same as "
+                                 "'--ts-log-every'")
 
         parser.add_argument('--checkpoint-every',
                             type=int,
@@ -175,7 +175,13 @@ class BaseExperimentManager:
 
     @classmethod
     def _check_args(cls, args):
+
+        # Default: save images every time we test
+        if args.test_imgs_every is None:
+            args.test_imgs_every = args.test_log_every
+
         assert args.test_imgs_every % args.test_log_every == 0
+
 
 
     @staticmethod
