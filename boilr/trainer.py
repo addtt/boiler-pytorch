@@ -1,6 +1,7 @@
 import os
 import pickle
 import warnings
+import timeit
 
 import torch
 try:
@@ -155,6 +156,15 @@ class Trainer:
                     # Restart progress bar
                     progress = tqdm(total=e.args.test_log_every, desc='train')
 
+                    # Restart timer to measure training speed
+                    timer_start = timeit.default_timer()
+                    steps_start = e.model.global_step
+
+                    # This timer stuff won't make sense if 'test every' is not
+                    # a multiple of 'train every'. Which is now true, but let's
+                    # be safe in case things change
+                    assert e.args.test_log_every % e.args.test_log_every == 0
+
                 # Reset gradients
                 e.optimizer.zero_grad()
 
@@ -186,6 +196,17 @@ class Trainer:
 
                     # Print summaries
                     print(e.train_log_str(summaries, step + 1, epoch))
+
+                    # Get training speed and add it to summaries (for history
+                    # and tensorboard). Do this *after* printing summaries.
+                    elapsed = timeit.default_timer() - timer_start
+                    iterations = e.model.global_step - steps_start
+                    steps_per_sec = iterations / elapsed
+                    examples_per_sec = steps_per_sec * e.args.batch_size
+                    summaries['speed/steps_per_sec'] = steps_per_sec
+                    summaries['speed/examples_per_sec'] = examples_per_sec
+                    timer_start = timeit.default_timer()
+                    steps_start = e.model.global_step
 
                     # Add train summaries (smoothed) to history and dump it to
                     # file and to tensorboard if available
