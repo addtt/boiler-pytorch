@@ -26,7 +26,7 @@ pip install -r requirements.txt
 CUDA_VISIBLE_DEVICES=0 python example.py
 ```
 
-Tested with:
+Last tested with:
 
 - `python 3.7.6`
 - `numpy 1.18.2`

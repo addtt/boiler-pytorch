@@ -1,14 +1,17 @@
 from copy import deepcopy
 
-_print_options = {
+
+_options = {
     'model_print_depth': 3,
+    'train_summarizer_ma_length': 1000,
 }
+
 
 def set_options(**kwargs):
     # Check arguments
     invalid = []
     for k in kwargs:
-        if k not in _print_options:
+        if k not in _options:
             invalid.append(k)
     if len(invalid) > 0:
         msg = "Invalid option names: "
@@ -22,20 +25,29 @@ def set_options(**kwargs):
             raise ValueError(msg)
 
     # Update options
-    _print_options.update(**kwargs)
+    _options.update(**kwargs)
 
-def get_options(name=None):
+
+def get_option(name):
+    return _get_options(name)
+
+
+def get_options():
+    return _get_options()
+
+
+def _get_options(name=None):
     if name is None:
-        return deepcopy(_print_options)
-    return deepcopy(_print_options[name])
+        return deepcopy(_options)
+    return deepcopy(_options[name])
+
 
 def _check_option(name, value):
     if name == 'model_print_depth':
         if value is None:
             return True
-        if not isinstance(value, int):
-            return False
-        if value < 1:
-            return False
-        return True
-    raise ValueError("Unknown option name {}".format(repr(name)))
+        return isinstance(value, int) and value > 0
+    elif name == 'train_summarizer_ma_length':
+        return isinstance(value, int) and value > 0
+    else:
+        raise ValueError("Unknown option name {}".format(repr(name)))

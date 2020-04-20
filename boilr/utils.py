@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.utils.data
 
-from .options import get_options
+from .options import get_option
 
 __sentinel = object()
 
@@ -17,7 +17,7 @@ __sentinel = object()
 def print_num_params(model, max_depth=__sentinel):
 
     if max_depth is __sentinel:
-        max_depth = get_options('model_print_depth')
+        max_depth = get_option('model_print_depth')
     assert max_depth is None or isinstance(max_depth, int)
 
     sep = '.'  # string separator in parameter name

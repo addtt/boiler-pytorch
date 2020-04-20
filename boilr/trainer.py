@@ -14,6 +14,7 @@ except ImportError as e:
 from tqdm import tqdm
 
 from . import viz
+from .options import get_option
 from .summarize import History, SummarizerCollection
 from .utils import set_rnd_seed, get_date_str
 
@@ -122,7 +123,8 @@ class Trainer:
         e = self.experiment
         train_loader = e.dataloaders.train
         train_summarizers = SummarizerCollection(
-            mode='moving_average', ma_length=1000)  # TODO use boilr options
+            mode='moving_average',
+            ma_length=get_option('train_summarizer_ma_length'))
         progress = None
 
         # Training mode
