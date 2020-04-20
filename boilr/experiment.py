@@ -59,6 +59,7 @@ class BaseExperimentManager:
                           seed=54321,
                           train_log_every=10000,
                           test_log_every=10000,
+                          test_imgs_every=10000,
                           checkpoint_every=100000,
                           keep_checkpoint_max=3,
                           resume="",
@@ -106,6 +107,14 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='test_log_every',
                             help='log test metrics every this number of '
+                                 'training steps')
+
+        parser.add_argument('--ts-img-every',
+                            type=int,
+                            default=test_imgs_every,
+                            metavar='N',
+                            dest='test_imgs_every',
+                            help='save test images every this number of '
                                  'training steps')
 
         parser.add_argument('--checkpoint-every',

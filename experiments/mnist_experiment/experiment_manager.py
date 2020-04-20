@@ -132,6 +132,7 @@ class MnistExperiment(VIExperimentManager):
                                seed=54321,
                                train_log_every=1000,
                                test_log_every=1000,
+                               test_imgs_every=2000,
                                checkpoint_every=10000,
                                resume="",
 
@@ -147,7 +148,9 @@ class MnistExperiment(VIExperimentManager):
 
         args = parser.parse_args()
 
+        # TODO these assertions should be downstream within boilr
         assert args.loglikelihood_every % args.test_log_every == 0
+        assert args.test_imgs_every % args.test_log_every == 0
 
         return args
 
