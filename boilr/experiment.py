@@ -106,8 +106,9 @@ class BaseExperimentManager:
                             default=test_log_every,
                             metavar='N',
                             dest='test_log_every',
-                            help='log test metrics every this number of '
-                                 'training steps')
+                            help="log test metrics every this number of "
+                                 "training steps. It must be a multiple of "
+                                 "'--tr-log-every'")
 
         parser.add_argument('--ts-img-every',
                             type=int,
@@ -184,6 +185,14 @@ class BaseExperimentManager:
             msg = ("'test_imgs_every' must be a multiple of 'test_log_every',"
                    " but current values are {img} and {log}")
             msg = msg.format(img=args.test_imgs_every, log=args.test_log_every)
+            raise ValueError(msg)
+
+        # This is not necessary but there's no reason not to have it like this,
+        # and it usually looks horrible otherwise.
+        if args.test_log_every % args.train_log_every != 0:
+            msg = ("'test_log_every' must be a multiple of 'train_log_every',"
+                   " but current values are {tr} and {ts}")
+            msg = msg.format(tr=args.test_log_every, ts=args.train_log_every)
             raise ValueError(msg)
 
 
