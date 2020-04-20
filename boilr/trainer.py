@@ -1,7 +1,7 @@
 import os
 import pickle
-import warnings
 import timeit
+import warnings
 
 import torch
 try:
@@ -14,10 +14,10 @@ except ImportError as e:
     have_tensorboard = False
 from tqdm import tqdm
 
-from . import viz
-from .options import get_option
-from .summarize import History, SummarizerCollection
-from .utils import set_rnd_seed, get_date_str
+from boilr.options import get_option
+from boilr.utils import set_rnd_seed, get_date_str
+from boilr.utils import viz
+from boilr.utils.summarize import History, SummarizerCollection
 
 
 class Trainer:

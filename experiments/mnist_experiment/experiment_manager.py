@@ -6,7 +6,7 @@ from torchvision.utils import save_image
 
 import boilr
 from boilr import VIExperimentManager
-from boilr.viz import img_grid_pad_value
+from boilr.utils.viz import img_grid_pad_value
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 

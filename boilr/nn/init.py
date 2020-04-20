@@ -1,7 +1,8 @@
 import torch
 from torch import nn
 
-from .utils import to_np, is_conv, is_linear
+from boilr.nn.utils import is_conv, is_linear
+from boilr.utils import to_np
 
 debug = False
 

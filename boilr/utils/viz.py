@@ -6,7 +6,7 @@ import torch
 from matplotlib import pyplot as plt
 from torchvision.utils import make_grid
 
-from boilr.utils import named_leaf_modules
+from boilr.nn.utils import named_leaf_modules
 
 img_folder = None
 

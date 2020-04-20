@@ -1,11 +1,12 @@
-from os.path import join
+import os
 
 import numpy as np
 import torch
 from torch import nn
 
-from .utils import get_module_device, checkpoints_in_folder
-import os
+from boilr.nn.utils import get_module_device
+from boilr.utils import checkpoints_in_folder
+
 
 class BaseModel(nn.Module):
 
@@ -24,7 +25,7 @@ class BaseModel(nn.Module):
         filenames, _ = checkpoints_in_folder(ckpt_folder)
 
         # Save checkpoint
-        path = join(ckpt_folder, "model_{}.pt".format(self.global_step))
+        path = os.path.join(ckpt_folder, "model_{}.pt".format(self.global_step))
         torch.save(self.state_dict(), path)
 
         # Return if we're supposed to keep all checkpoints
@@ -49,7 +50,7 @@ class BaseModel(nn.Module):
         else:
             ckpt_name = "model_{}.pt".format(step)
         print("Loading model checkpoint at step {}...".format(step))
-        path = join(ckpt_folder, ckpt_name)
+        path = os.path.join(ckpt_folder, ckpt_name)
         self.load_state_dict(torch.load(path, map_location=device))
         self.global_step = step
         print("Loaded.")

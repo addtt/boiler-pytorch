@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.distributions import Normal, kl_divergence
 
-from boilr import BaseGenerativeModel
+from boilr.models import BaseGenerativeModel
 
 data_std = .02
 

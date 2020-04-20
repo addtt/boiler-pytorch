@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from .summarize import SummarizerCollection
-from .utils import print_num_params
+from boilr.nn.utils import print_num_params
+from boilr.utils.summarize import SummarizerCollection
 
 
 class BaseExperimentManager:

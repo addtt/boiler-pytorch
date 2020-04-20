@@ -1,17 +1,14 @@
 import os
 import pickle
 import warnings
-from os import path
 
 import torch
-import torch.utils.data
-import torch.utils.data
 
-from . import viz
-from .utils import get_date_str
+from boilr.utils import viz
+from boilr.utils.utils import get_date_str
 
 
-class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
+class BaseOfflineEvaluator:  # TODO test this in example.py
     """
     Class with boilerplate code to run evaluation routines on a trained model.
 
@@ -47,15 +44,15 @@ class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
         if eval_args.load_step is not None:
             # TODO load from given step
             warnings.warn(
-                "Loading weights from specific training step is not supported for "
-                "now. The model will be loaded from the last checkpoint.")
+                "Loading weights from specific training step is not supported "
+                "for now. The model will be loaded from the last checkpoint.")
 
         # Get path to load model
-        checkpoint_folder = path.join('checkpoints', eval_args.load)
+        checkpoint_folder = os.path.join('checkpoints', eval_args.load)
 
         # Add date string and create folder on evaluation_results
-        self.result_folder = path.join('evaluation_results',
-                                       date_str + '_' + eval_args.load)
+        self.result_folder = os.path.join('evaluation_results',
+                                          date_str + '_' + eval_args.load)
         self.img_folder = os.path.join(self.result_folder, 'imgs')
         os.makedirs(self.result_folder)
         os.makedirs(self.img_folder)
@@ -64,7 +61,7 @@ class BaseOfflineEvaluator:  # TODO test this and/or use it in example.py
         viz.img_folder = self.img_folder
 
         # Load config
-        config_path = path.join(checkpoint_folder, 'config.pkl')
+        config_path = os.path.join(checkpoint_folder, 'config.pkl')
         with open(config_path, 'rb') as file:
             args = pickle.load(file)
 
