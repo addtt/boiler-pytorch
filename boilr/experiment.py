@@ -312,9 +312,11 @@ class BaseExperimentManager:
         raise NotImplementedError
 
 
-    def additional_testing(self, img_folder):
+    def save_images(self, img_folder):
         """
-        Perform additional testing, including possibly generating images.
+        Save test images. For example, in VAEs, input and reconstruction pairs,
+        or sample from the model prior. Images are meant to be saved to the
+        image folder that is automatically created by the Trainer.
 
         :param img_folder: folder to store images
         """
@@ -368,6 +370,8 @@ class VIExperimentManager(BaseExperimentManager):
         summarizers = SummarizerCollection(mode='sum')
         progress = tqdm(total=len(test_loader) * iw_samples, desc='test ')
         all_elbo_sep = torch.zeros(n_test, iw_samples)
+
+        # Do test
         for batch_idx, (x, y) in enumerate(test_loader):
             for i in range(iw_samples):
                 outputs = self.forward_pass(x, y)

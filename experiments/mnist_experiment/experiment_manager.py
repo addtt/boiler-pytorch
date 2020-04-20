@@ -66,9 +66,9 @@ class MnistExperiment(VIExperimentManager):
         return out
 
 
-    def additional_testing(self, img_folder):
+    def save_images(self, img_folder):
         """
-        Perform additional testing, including possibly generating images.
+        Save test images.
 
         In this case, save samples from the generative model, and pairs
         input/reconstruction from the test set.

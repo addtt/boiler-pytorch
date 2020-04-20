@@ -225,8 +225,8 @@ class Trainer:
         # Get test results
         summaries = e.test_procedure()
 
-        # Additional testing, possibly including saving images
-        e.additional_testing(self.img_folder)
+        # Save images
+        e.save_images(self.img_folder)
 
         # Print log string with test results (experiment-specific)
         print(e.test_log_str(summaries, step, epoch))
