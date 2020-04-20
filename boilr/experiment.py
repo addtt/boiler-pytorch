@@ -176,11 +176,15 @@ class BaseExperimentManager:
     @classmethod
     def _check_args(cls, args):
 
-        # Default: save images every time we test
+        # Default: save images at each test
         if args.test_imgs_every is None:
             args.test_imgs_every = args.test_log_every
 
-        assert args.test_imgs_every % args.test_log_every == 0
+        if args.test_imgs_every % args.test_log_every != 0:
+            msg = ("'test_imgs_every' must be a multiple of 'test_log_every',"
+                   " but current values are {img} and {log}")
+            msg = msg.format(img=args.test_imgs_every, log=args.test_log_every)
+            raise ValueError(msg)
 
 
 
@@ -453,5 +457,12 @@ class VIExperimentManager(BaseExperimentManager):
 
     @classmethod
     def _check_args(cls, args):
-        assert args.loglikelihood_every % args.test_log_every == 0
+
+        if args.loglikelihood_every % args.test_log_every != 0:
+            msg = ("'loglikelihood_every' must be a multiple of "
+                   "'test_log_every', but current values are {ll} and {log}")
+            msg = msg.format(img=args.loglikelihood_every, log=args.test_log_every)
+            raise ValueError(msg)
+
+        # Check arguments by superclass
         super(VIExperimentManager, cls)._check_args(args)
