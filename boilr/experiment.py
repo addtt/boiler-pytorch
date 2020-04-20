@@ -461,7 +461,7 @@ class VIExperimentManager(BaseExperimentManager):
         if args.loglikelihood_every % args.test_log_every != 0:
             msg = ("'loglikelihood_every' must be a multiple of "
                    "'test_log_every', but current values are {ll} and {log}")
-            msg = msg.format(img=args.loglikelihood_every, log=args.test_log_every)
+            msg = msg.format(ll=args.loglikelihood_every, log=args.test_log_every)
             raise ValueError(msg)
 
         # Check arguments by superclass
