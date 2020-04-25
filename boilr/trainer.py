@@ -21,9 +21,13 @@ from boilr.utils.summarize import History, SummarizerCollection
 
 
 class Trainer:
-    """
-    Generic tool for training models. All model- and experiment-specific work is
-    defined and performed in an experiment object, which is provided at init.
+    """Generic tool for training models.
+
+    All model- and experiment-specific work is defined and performed in an
+    experiment object, which is provided at initialization.
+
+    Args:
+        experiment (boilr.experiment.BaseExperimentManager)
     """
 
     def __init__(self, experiment):
@@ -58,6 +62,7 @@ class Trainer:
             with open(config_path, 'rb') as file:
                 args = pickle.load(file)
             assert not args.dry_run  # this would not make sense
+            # TODO maybe refactor this and make args a property
             experiment.args = args  # copy them over to the experiment
 
             # Load training and test history from log.pkl
@@ -114,8 +119,8 @@ class Trainer:
         # Check everything is initialized properly
         self._check_experiment(experiment)
 
-
     def run(self):
+        """Runs the trainer."""
 
         # This is needed when loading to resume training
         first_step = True
@@ -270,13 +275,11 @@ class Trainer:
         # Training mode
         e.model.train()
 
-
     def _history_dict(self):
         return {
             'train': self.train_history.get_dict(),
             'test': self.test_history.get_dict(),
         }
-
 
     @staticmethod
     def _check_experiment(e):

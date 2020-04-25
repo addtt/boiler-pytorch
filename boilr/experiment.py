@@ -10,45 +10,40 @@ from boilr.utils.summarize import SummarizerCollection
 
 
 class BaseExperimentManager:
-    """
-    Experiment manager.
+    """Base class for experiment manager.
 
-    Data attributes:
-    - 'args': argparse.Namespace containing all config parameters. When
-      initializing this object, if 'args' is not given, all config
-      parameters are set based on experiment defaults and user input, using
-      argparse.
-    - 'run_description': string description of the run that includes a timestamp
-      and can be used e.g. as folder name for logging.
-    - 'model': the model.
-    - 'device': torch.device that is being used
-    - 'dataloaders': DataLoaders, with attributes 'train' and 'test'
-    - 'optimizer': the optimizer
+    If 'args' is not given, all config parameters are set based on experiment
+    defaults and user input, using argparse.
+
+    Args:
+        args (argparse.Namespace, optional): Configuration
+
+    Attributes:
+        device (torch.device): Device in use
+        args (argparse.Namespace): Configuration
     """
 
     def __init__(self, args=None):
-        self.device = None
-        self.dataloaders = None
-        self.model = None
-        self.optimizer = None
-        self.args = args
+        self._dataloaders = None
+        self._model = None
+        self._optimizer = None
+        self.device = None   # TODO should device and args be here?
+        self.args = args     # TODO should they be properties?
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             allow_abbrev=False)
         if args is None:
             self.args = self._parse_args(parser)
         self._check_args(self.args)
-        self.run_description = self._make_run_description(self.args)
-
+        self._run_description = self._make_run_description(self.args)
 
     def _parse_args(self, parser):
-        """
-        Parse command-line arguments defining experiment settings.
+        """Parses command-line arguments defining experiment settings.
 
-        :return: args: argparse.Namespace with experiment settings
+        Returns:
+            args (argparse.Namespace): Experiment settings
         """
         raise NotImplementedError
-
 
     def add_required_args(self,
                           parser,
@@ -64,6 +59,22 @@ class BaseExperimentManager:
                           keep_checkpoint_max=3,
                           resume="",
                           ):
+        """Adds arguments required by BaseExperimentManager to the parser.
+
+        Args:
+            parser (argparse.ArgumentParser):
+            batch_size (int, optional):
+            test_batch_size (int, optional):
+            lr (float, optional):
+            max_epochs (int, optional):
+            max_steps (int, optional):
+            seed (int, optional):
+            train_log_every (int, optional):
+            test_log_every (int, optional):
+            checkpoint_every (int, optional):
+            keep_checkpoint_max (int, optional):
+            resume (str, optional):
+        """
 
         parser.add_argument('--batch-size',
                             type=int,
@@ -173,9 +184,16 @@ class BaseExperimentManager:
                             dest='resume',
                             help="load the run with this name and resume training")
 
-
     @classmethod
     def _check_args(cls, args):
+        """Checks arguments relevant to this class.
+
+        Subclasses should check their own arguments and call the super's
+        implementation of this method.
+
+        Args:
+            args (argparse.Namespace)
+        """
 
         # Default: save images at each test
         if args.test_imgs_every is None:
@@ -195,48 +213,38 @@ class BaseExperimentManager:
             msg = msg.format(tr=args.test_log_every, ts=args.train_log_every)
             raise ValueError(msg)
 
-
-
     @staticmethod
     def _make_run_description(args):
-        """
-        Create a string description of the run. It is used in the names of the
-        logging folders.
+        """Creates a string description of the run.
 
-        :param args: experiment config
-        :return: the run description
-        """
-        raise NotImplementedError
+        Args:
+            args (argparse.Namespace): Experiment configuration
 
-
-    def make_datamanager(self):
-        """
-        Create a DatasetManager object. To be overridden.
-        :return: DatasetManager
+        Returns:
+            (str): The run description
         """
         raise NotImplementedError
 
-
-    def make_model(self):
-        """
-        Create a model. To be overridden.
-        :return: model
-        """
+    def _make_datamanager(self):
+        """Creates a dataset manager to wrap data loaders."""
         raise NotImplementedError
 
+    def _make_model(self):
+        """Creates a model."""
+        raise NotImplementedError
 
     def make_optimizer(self):
-        """
-        Create an optimizer. To be overridden.
-        :return: optimizer
-        """
+        """Creates the optimizer."""
         raise NotImplementedError
 
-
     def setup(self, checkpoint_folder=None):
-        """
-        Setup experiment: load dataset, create model, load weights if a
-        checkpoint is given, create optimizer.
+        """Sets the experiment up.
+
+        Loads the dataset, creates the model, loads the model weights if a
+        checkpoint folder is provided, and creates the optimizer.
+
+        Args:
+            checkpoint_folder (str, optional)
         """
 
         # If checkpoint folder is given, load model from there to resume
@@ -244,7 +252,7 @@ class BaseExperimentManager:
 
         # Dataset
         print("Getting dataset ready...")
-        self.dataloaders = self.make_datamanager()
+        self._dataloaders = self._make_datamanager()
         print("Data shape: {}".format(self.dataloaders.data_shape))
         print("Train/test set size: {}/{}".format(
             len(self.dataloaders.train.dataset),
@@ -253,7 +261,7 @@ class BaseExperimentManager:
 
         # Model
         print("Creating model...")
-        self.model = self.make_model().to(self.device)
+        self._model = self._make_model().to(self.device)
         print_num_params(self.model)
 
         # Load weights if resuming training
@@ -261,38 +269,48 @@ class BaseExperimentManager:
             self.load_model(checkpoint_folder, step=None)
 
         # Optimizer
-        self.optimizer = self.make_optimizer()
-
+        self._optimizer = self.make_optimizer()
 
     def load_model(self, checkpoint_folder, step=None):
-        """
-        Loads model weights from a checkpoint in the specified folder.
+        """Loads model weights from a checkpoint in the specified folder.
+
         If step is given, it attempts to load the checkpoint at that step.
         The weights are loaded with map_location=device, where device is the
         current device of this experiment.
+
+        Args:
+            checkpoint_folder (str)
+            step (int, optional)
         """
         self.model.load(checkpoint_folder, self.device, step=step)
 
-
     def forward_pass(self, x, y=None):
-        """
-        Simple single-pass model evaluation. It consists of a forward pass
-        and computation of all necessary losses and metrics.
+        """Simple single-pass model evaluation.
+
+        It consists of a forward pass and computation of all necessary losses
+        and metrics.
+
+        Args:
+            x (Tensor): data
+            y (Tensor, optional): labels
+
+        Returns:
+            metrics (dict)
         """
         raise NotImplementedError
 
-
     def post_backward_callback(self):
+        """Callback method, called after backward pass and before step."""
         pass
-
 
     @classmethod
     def get_metrics_dict(cls, results):
-        """
-        Given a dict of results, return a dict of metrics to be given to
+        """Returns metrics given a dictionary of results.
+
+        Given a dict of results, returns a dict of metrics to be given to
         summarizers. Keys are also used as names for tensorboard logging.
 
-        In the base implementation, keys are simply copyed and used as names
+        In the base implementation, keys are simply copied and used as names
         for tensorboard.
 
         Only scalars accepted, non-scalars are discarded. Actually, anything
@@ -302,6 +320,12 @@ class BaseExperimentManager:
 
         Override to customize translation from results to dictionary of
         scalar metrics.
+
+        Args:
+            results (dict)
+
+        Returns:
+            metrics_dict (dict)
         """
         metrics_dict = {}
         for k in results:
@@ -315,17 +339,17 @@ class BaseExperimentManager:
                 pass
         return metrics_dict
 
-
     @classmethod
     def train_log_str(cls, summaries, step, epoch=None):
+        """Returns log string for training metrics."""
         s = "       [step {}]".format(step)
         for k in summaries:
             s += "  {key}={value:.5g}".format(key=k, value=summaries[k])
         return s
 
-
     @classmethod
     def test_log_str(cls, summaries, step, epoch=None):
+        """Returns log string for test metrics."""
         s = "       "
         if epoch is not None:
             s += "[step {}, epoch {}]".format(step, epoch)
@@ -333,58 +357,73 @@ class BaseExperimentManager:
             s += "  {key}={value:.5g}".format(key=k, value=summaries[k])
         return s
 
-
     def test_procedure(self, **kwargs):
-        """
-        Execute test procedure for the experiment. This typically includes
-        collecting metrics on the test set using forward_pass().
-        For example in variational inference we might be interested in
-        repeating this many times to derive the importance-weighted ELBO.
+        """Executes the experiment's test procedure and returns results.
 
-        :return: summaries (dict)
+        This typically includes collecting metrics on the test set using
+        forward_pass(). For example in variational inference we might be
+        interested in repeating this many times to derive the importance-
+        weighted ELBO.
+
+        Returns:
+            summaries (dict)
         """
         raise NotImplementedError
-
 
     def save_images(self, img_folder):
-        """
-        Save test images. For example, in VAEs, input and reconstruction pairs,
-        or sample from the model prior. Images are meant to be saved to the
-        image folder that is automatically created by the Trainer.
+        """Saves test images.
 
-        :param img_folder: folder to store images
+        For example, in VAEs, input and reconstruction pairs, or sample from
+        the model prior. Images are meant to be saved to the image folder
+        that is automatically created by the Trainer.
+
+        Args:
+            img_folder (str): Folder to store images
         """
         raise NotImplementedError
+
+    @property
+    def run_description(self):
+        """String description of the run, used e.g. as log folder name."""
+        return self._run_description
+
+    @property
+    def dataloaders(self):
+        """Wrapper for train and test data loaders."""
+        return self._dataloaders
+
+    @property
+    def model(self):
+        """Model."""
+        return self._model
+
+    @property
+    def optimizer(self):
+        """Optimizer."""
+        return self._optimizer
 
 
 class VIExperimentManager(BaseExperimentManager):
-    """
-    Variational inference experiment manager. This version implements a default
-    test_procedure for variational inference.
+    """Subclass of experiment manager for variational inference.
 
-    Data attributes:
-    - 'args': argparse.Namespace containing all config parameters. When
-      initializing this object, if 'args' is not given, all config
-      parameters are set based on experiment defaults and user input, using
-      argparse.
-    - 'run_description': string description of the run that includes a timestamp
-      and can be used e.g. as folder name for logging.
-    - 'model': the model.
-    - 'device': torch.device that is being used
-    - 'dataloaders': DataLoaders, with attributes 'train' and 'test'
-    - 'optimizer': the optimizer
+    This version implements a default test_procedure for variational inference.
+
+    See the superclass docs for more details.
     """
 
     def test_procedure(self, iw_samples=None):
-        """
-        Execute test procedure for the experiment. This typically includes
-        collecting metrics on the test set using forward_pass().
-        Repeat this many times to derive the importance-weighted ELBO.
+        """Executes the experiment's test procedure and returns results.
 
-        :param iw_samples: number of samples for the importance-weighted ELBO.
-                The other metrics are also averaged over all these samples,
-                yielding a more accurate estimate.
-        :return: summaries (dict)
+        Collects variational inference metrics on the test set using
+        forward_pass(), and repeat to derive the importance-weighted ELBO.
+
+        Args:
+            iw_samples (int, optional): number of samples for the importance-
+                weighted ELBO. The other metrics are also averaged over all
+                these samples, yielding a more accurate estimate.
+
+        Returns:
+            summaries (dict)
         """
 
         # Shorthand
@@ -435,9 +474,7 @@ class VIExperimentManager(BaseExperimentManager):
             summarizers.add({key: elbo_iw})
 
         summaries = summarizers.get_all(reset=True)
-
         return summaries
-
 
     def add_required_args(self,
                           parser,
@@ -445,6 +482,17 @@ class VIExperimentManager(BaseExperimentManager):
                           loglikelihood_samples=100,
                           **kwargs
                           ):
+        """Adds arguments required by VIExperimentManager to the parser.
+
+        Args:
+            parser (argparse.ArgumentParser):
+            loglikelihood_every (int, optional):
+            loglikelihood_samples (int, optional):
+            **kwargs: keyword arguments to be passed on to the superclass.
+
+        Returns:
+
+        """
 
         super().add_required_args(parser, **kwargs)
 
@@ -466,6 +514,14 @@ class VIExperimentManager(BaseExperimentManager):
 
     @classmethod
     def _check_args(cls, args):
+        """Checks arguments relevant to this class and calls super's method.
+
+        Subclasses should check their own arguments and call the super's
+        implementation of this method.
+
+        Args:
+            args (argparse.Namespace)
+        """
 
         if args.loglikelihood_every % args.test_log_every != 0:
             msg = ("'loglikelihood_every' must be a multiple of "
@@ -473,5 +529,5 @@ class VIExperimentManager(BaseExperimentManager):
             msg = msg.format(ll=args.loglikelihood_every, log=args.test_log_every)
             raise ValueError(msg)
 
-        # Check arguments by superclass
+        # Check superclass's arguments
         super(VIExperimentManager, cls)._check_args(args)

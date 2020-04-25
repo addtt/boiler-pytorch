@@ -29,11 +29,11 @@ class MnistExperiment(VIExperimentManager):
     - 'optimizer': the optimizer
     """
 
-    def make_datamanager(self):
+    def _make_datamanager(self):
         cuda = self.device.type == 'cuda'
         return DatasetManager(self.args, cuda)
 
-    def make_model(self):
+    def _make_model(self):
         return MnistVAE()
 
     def make_optimizer(self):
