@@ -59,19 +59,15 @@ class BaseDatasetManager:
         pm = getattr(kwargs, 'pin_memory', False)
         dl_kwargs = {'num_workers': nw, 'pin_memory': pm} if cuda else {}
 
-        dl_train = DataLoader(
-            train,
-            batch_size=cfg.batch_size,
-            shuffle=True,
-            drop_last=True,
-            **dl_kwargs
-        )
-        dl_test = DataLoader(
-            test,
-            batch_size=cfg.test_batch_size,
-            shuffle=False,
-            **dl_kwargs
-        )
+        dl_train = DataLoader(train,
+                              batch_size=cfg.batch_size,
+                              shuffle=True,
+                              drop_last=True,
+                              **dl_kwargs)
+        dl_test = DataLoader(test,
+                             batch_size=cfg.test_batch_size,
+                             shuffle=False,
+                             **dl_kwargs)
         return dl_train, dl_test
 
     @property

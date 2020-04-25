@@ -12,6 +12,7 @@ img_folder = None
 
 
 def _unique_filename(fname, extension):
+
     def exists(fname):
         return os.path.exists(fname + '.' + extension)
 
@@ -25,15 +26,22 @@ def _unique_filename(fname, extension):
 
 
 def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
-    """
+    """Saves collection of images.
+
     Plots collection of 1-channel images (as 3D tensor, or 4D tensor with size
     1 on the 2nd dimension) and saves it as png. If any image extends beyond
     [0, 1], all are normalized such that the minimum and maximum are 0 and 1.
 
     If overwrite is False, it automatically appends an integer to the filename
     to make it unique.
-    """
 
+    Args:
+        imgs (torch.Tensor):
+        name (str, optional):
+        extension (str, optional):
+        colorbar (bool, optional):
+        overwrite (bool, optional):
+    """
     if imgs.dim() == 4 and imgs.size(1) == 1:
         imgs = imgs.squeeze(1)
     if imgs.dim() != 3:
@@ -47,7 +55,7 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
     if not overwrite:
         fname = _unique_filename(fname, extension)
     fname = fname + '.' + extension
-    imgs = imgs.detach().cpu().unsqueeze(1)   # (N, 1, H, W)
+    imgs = imgs.detach().cpu().unsqueeze(1)  # (N, 1, H, W)
     n_imgs = imgs.size(0)
     _, c = balanced_approx_factorization(n_imgs)  # grid arrangement
 
@@ -97,13 +105,18 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
 
 
 def img_grid_pad_value(imgs, thresh=.2):
-    """
-    Hack to visualize boundaries between images with torchvision's save_image().
-    If the median border value of all images is below the threshold, use white,
-    otherwise black (which is the default)
-    :param imgs: 4d tensor
-    :param thresh: threshold in (0, 1)
-    :return: padding value
+    """Returns padding value (black or white) for a grid of images.
+
+    Hack to visualize boundaries between images with torchvision's
+    save_image(). If the median border value of all images is below the
+    threshold, use white, otherwise black (which is the default).
+
+    Args:
+        imgs (torch.Tensor): A 4d tensor
+        thresh (float, optional): Threshold in (0, 1).
+
+    Returns:
+        pad_value (float): The padding value
     """
 
     assert imgs.dim() == 4
@@ -125,12 +138,16 @@ def img_grid_pad_value(imgs, thresh=.2):
 
 
 def balanced_approx_factorization(x, ratio=1):
-    """
-    Util to plot images in a grid.
+    """Approximately factorize an integer into integers.
 
-    :param x: number to be approximately factorized
-    :param ratio: ratio columns/rows
-    :return: rows, columns
+    Useful for example to plot images in a grid.
+
+    Args:
+        x (int): Number to be approximately factorized
+        ratio (float or int, optional): Ratio columns/rows
+
+    Returns:
+        dims (tuple): A tuple (rows, columns)
     """
 
     # We want c/r to be approx equal to ratio, and r*c to be approx equal to x
@@ -159,9 +176,7 @@ def balanced_factorization(x):
 
 
 def clean_axes():
-    """
-    Clean current axes.
-    """
+    """Cleans current axes."""
     plt.gca().tick_params(
         axis='both',  # changes apply to the x-axis
         which='both',  # both major and minor ticks
@@ -174,6 +189,7 @@ def clean_axes():
 
 
 def _save_activation_hook(ord_dict, name):
+
     def hook(model, inp, ret):
         if isinstance(ret, tuple):
             try:
@@ -184,13 +200,27 @@ def _save_activation_hook(ord_dict, name):
                 print("WARNING:", e)
                 return
         ord_dict[name] = ret.detach()
+
     return hook
 
 
 def set_up_saving_all_activations(model):
+    """Registers forward hooks to save all activations in a model.
+
+    It returns a dictionary that will be populated by the forward hooks at
+    the next forward pass.
+
+    Args:
+        model (torch.nn.Module)
+
+    Returns:
+        activations (dict): A dict that will be populated with all activations
+            at the next forward pass.
+    """
     all_activations = OrderedDict()
     for module_name, module in named_leaf_modules(model):
-        module.register_forward_hook(_save_activation_hook(all_activations, module_name))
+        module.register_forward_hook(
+            _save_activation_hook(all_activations, module_name))
     return all_activations
 
 
@@ -220,7 +250,6 @@ if __name__ == '__main__':
     imgs = torch.rand(4, 1, 8, 8) * (high - low) + low
     plot_imgs(imgs, name='test_colorbar_false', colorbar=False)
     plot_imgs(imgs, name='test_colorbar_true', colorbar=True)
-
 
     ### Test img grid pad value
     img_grid_pad_value(torch.rand(6, 3, 32, 32), thresh=.3)

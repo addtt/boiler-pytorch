@@ -27,8 +27,8 @@ class BaseExperimentManager:
         self._dataloaders = None
         self._model = None
         self._optimizer = None
-        self.device = None   # TODO should device and args be here?
-        self.args = args     # TODO should they be properties?
+        self.device = None  # TODO should device and args be here?
+        self.args = args  # TODO should they be properties?
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             allow_abbrev=False)
@@ -45,20 +45,21 @@ class BaseExperimentManager:
         """
         raise NotImplementedError
 
-    def add_required_args(self,
-                          parser,
-                          batch_size=None,
-                          test_batch_size=None,
-                          lr=None,
-                          max_epochs=10000000,
-                          max_steps=10000000000,
-                          seed=54321,
-                          train_log_every=10000,
-                          test_log_every=10000,
-                          checkpoint_every=100000,
-                          keep_checkpoint_max=3,
-                          resume="",
-                          ):
+    def add_required_args(
+        self,
+        parser,
+        batch_size=None,
+        test_batch_size=None,
+        lr=None,
+        max_epochs=10000000,
+        max_steps=10000000000,
+        seed=54321,
+        train_log_every=10000,
+        test_log_every=10000,
+        checkpoint_every=100000,
+        keep_checkpoint_max=3,
+        resume="",
+    ):
         """Adds arguments required by BaseExperimentManager to the parser.
 
         Args:
@@ -110,7 +111,7 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='train_log_every',
                             help='log training metrics every this number of '
-                                 'training steps')
+                            'training steps')
 
         parser.add_argument('--ts-log-every',
                             type=int,
@@ -118,17 +119,17 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='test_log_every',
                             help="log test metrics every this number of "
-                                 "training steps. It must be a multiple of "
-                                 "'--tr-log-every'")
+                            "training steps. It must be a multiple of "
+                            "'--tr-log-every'")
 
         parser.add_argument('--ts-img-every',
                             type=int,
                             metavar='N',
                             dest='test_imgs_every',
                             help="save test images every this number of "
-                                 "training steps. It must be a multiple of "
-                                 "'--ts-log-every'. Default: same as "
-                                 "'--ts-log-every'")
+                            "training steps. It must be a multiple of "
+                            "'--ts-log-every'. Default: same as "
+                            "'--ts-log-every'")
 
         parser.add_argument('--checkpoint-every',
                             type=int,
@@ -136,7 +137,7 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='checkpoint_every',
                             help='save model checkpoint every this number of '
-                                 'training steps')
+                            'training steps')
 
         parser.add_argument('--keep-checkpoint-max',
                             type=int,
@@ -144,7 +145,7 @@ class BaseExperimentManager:
                             metavar='N',
                             dest='keep_checkpoint_max',
                             help='keep at most this number of most recent '
-                                 'model checkpoints')
+                            'model checkpoints')
 
         parser.add_argument('--max-steps',
                             type=int,
@@ -182,7 +183,8 @@ class BaseExperimentManager:
                             metavar='NAME',
                             default=resume,
                             dest='resume',
-                            help="load the run with this name and resume training")
+                            help="load the run with this name and "
+                            "resume training")
 
     @classmethod
     def _check_args(cls, args):
@@ -452,7 +454,7 @@ class VIExperimentManager(BaseExperimentManager):
                 # elbo_sep shape (batch size,)
                 i_start = batch_idx * args.test_batch_size
                 i_end = (batch_idx + 1) * args.test_batch_size
-                all_elbo_sep[i_start: i_end, i] = outputs['elbo_sep'].detach()
+                all_elbo_sep[i_start:i_end, i] = outputs['elbo_sep'].detach()
 
                 metrics_dict = self.get_metrics_dict(outputs)
                 multiplier = (x.size(0) / n_test) / iw_samples
@@ -480,8 +482,7 @@ class VIExperimentManager(BaseExperimentManager):
                           parser,
                           loglikelihood_every=50000,
                           loglikelihood_samples=100,
-                          **kwargs
-                          ):
+                          **kwargs):
         """Adds arguments required by VIExperimentManager to the parser.
 
         Args:
@@ -489,9 +490,6 @@ class VIExperimentManager(BaseExperimentManager):
             loglikelihood_every (int, optional):
             loglikelihood_samples (int, optional):
             **kwargs: keyword arguments to be passed on to the superclass.
-
-        Returns:
-
         """
 
         super().add_required_args(parser, **kwargs)
@@ -502,7 +500,7 @@ class VIExperimentManager(BaseExperimentManager):
                             metavar='N',
                             dest='loglikelihood_every',
                             help='evaluate log likelihood every this number '
-                                 'of training steps')
+                            'of training steps')
 
         parser.add_argument('--ll-samples',
                             type=int,
@@ -510,7 +508,7 @@ class VIExperimentManager(BaseExperimentManager):
                             metavar='N',
                             dest='loglikelihood_samples',
                             help='number of importance-weighted samples to '
-                                 'evaluate log likelihood')
+                            'evaluate log likelihood')
 
     @classmethod
     def _check_args(cls, args):
@@ -526,7 +524,8 @@ class VIExperimentManager(BaseExperimentManager):
         if args.loglikelihood_every % args.test_log_every != 0:
             msg = ("'loglikelihood_every' must be a multiple of "
                    "'test_log_every', but current values are {ll} and {log}")
-            msg = msg.format(ll=args.loglikelihood_every, log=args.test_log_every)
+            msg = msg.format(ll=args.loglikelihood_every,
+                             log=args.test_log_every)
             raise ValueError(msg)
 
         # Check superclass's arguments

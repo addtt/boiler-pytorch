@@ -67,7 +67,7 @@ class BaseModel(nn.Module):
         """
         if step is None:
             filenames, numbers = checkpoints_in_folder(ckpt_folder)
-            ckpt_name = filenames[np.argmax(numbers)]   # get latest checkpoint
+            ckpt_name = filenames[np.argmax(numbers)]  # get latest checkpoint
             step = max(numbers)
         else:
             ckpt_name = "model_{}.pt".format(step)

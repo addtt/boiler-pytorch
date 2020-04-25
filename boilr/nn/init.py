@@ -7,7 +7,21 @@ from boilr.utils import to_np
 debug = False
 
 
-def _get_data_dep_hook(init_scale=1.):
+def _get_data_dep_hook(init_scale):
+    """Creates forward hook for data-dependent initialization.
+
+    The hook computes output statistics of the layer, corrects weights and
+    bias, and corrects the output accordingly in-place, so the forward pass
+    can continue.
+
+    Args:
+        init_scale (float): Desired scale (standard deviation) of each
+            layer's output at initialization.
+
+    Returns:
+        Forward hook for data-dependent initialization
+    """
+
     def hook(module, inp, out):
         inp = inp[0]
 
@@ -33,8 +47,8 @@ def _get_data_dep_hook(init_scale=1.):
                 to_np(module.weight.mean()), to_np(module.weight.var())))
 
         # Given channel y[i] we want to get
-        #   y'[i] = (y[i] - mu[i]) * is / s[i]
-        #         = (b[i] - mu[i]) * is / s[i] + sum_k (w[i, k] * is / s[i] * x[k])
+        #   y'[i] = (y[i]-mu[i]) * is/s[i]
+        #         = (b[i]-mu[i]) * is/s[i] + sum_k (w[i, k] * is / s[i] * x[k])
         # where * is 2D convolution, k denotes input channels, mu[i] is the
         # sample mean of channel i, s[i] the sample variance, b[i] the current
         # bias, 'is' the initial scale, and w[i, k] the weight kernel for input
@@ -47,7 +61,8 @@ def _get_data_dep_hook(init_scale=1.):
         scale = torch.sqrt(var + 1e-5)
 
         # Fix bias
-        module.bias.data = (module.bias.data - mean.flatten()) * init_scale / scale.flatten()
+        module.bias.data = ((module.bias.data - mean.flatten()) * init_scale /
+                            scale.flatten())
 
         # Get correct dimension if transposed conv
         transp_conv = getattr(module, 'transposed', False)
@@ -69,6 +84,19 @@ def _get_data_dep_hook(init_scale=1.):
 
 
 def data_dependent_init(model, model_input_dict, init_scale=.1):
+    """Performs data-dependent initialization on a model.
+
+    Updates each layer's weights such that its outputs, computed on a batch
+    of actual data, have mean 0 and the same standard deviation. See the code
+    for more details.
+
+    Args:
+        model (torch.nn.Module):
+        model_input_dict (dict): Dictionary of inputs to the model.
+        init_scale (float, optional): Desired scale (standard deviation) of
+            each layer's output at initialization. Default: 0.1.
+    """
+
     hook_handles = []
     modules = filter(lambda m: is_conv(m) or is_linear(m), model.modules())
     for module in modules:
@@ -77,7 +105,8 @@ def data_dependent_init(model, model_input_dict, init_scale=.1):
         module.bias.data.zero_()
 
         # Forward hook: data-dependent initialization
-        hook_handle = module.register_forward_hook(_get_data_dep_hook(init_scale))
+        hook_handle = module.register_forward_hook(
+            _get_data_dep_hook(init_scale))
         hook_handles.append(hook_handle)
 
     # Forward pass one minibatch
@@ -93,16 +122,18 @@ def data_dependent_init(model, model_input_dict, init_scale=.1):
 if __name__ == '__main__':
     debug = True
 
-    # *** Test simple data-dependent init
+    # Test simple data-dependent init
+
 
     def do_test(x, layer):
         layer.bias.data.zero_()
-        print("Output stats before:", layer(x).mean().item(), layer(x).var().item())
+        print("Output stats before:",
+              layer(x).mean().item(),
+              layer(x).var().item())
         handle = layer.register_forward_hook(_get_data_dep_hook(init_scale=0.5))
         y = layer(x)
         print("Output stats after:", y.mean().item(), y.var().item())
         handle.remove()
-
 
     # shape 64, 3, 5, 5
     x__ = (torch.rand(64, 3, 5, 5) - 0.2) * 20

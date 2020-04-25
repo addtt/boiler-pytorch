@@ -42,9 +42,9 @@ def to_np(x):
 
 
 def checkpoints_in_folder(folder):
-    r"""Find checkpoints in a folder.
+    """Finds checkpoints in a folder.
 
-    Find checkpoint files in the speficied folder, return a list of file names
+    Finds checkpoint files in the speficied folder, return a list of file names
     and a list of integers corresponding to the time steps when the checkpoints
     were saved. These lists have the same length, they have a one-to-one
     correspondence, and they are sorted by number.
@@ -54,7 +54,8 @@ def checkpoints_in_folder(folder):
 
     Returns:
         filenames (list of str): File names of checkpoints. The full path is
-        obtained by joining the input argument folder with these file names.
+            obtained by joining the input argument folder with these file
+            names.
         numbers (list of int)
     """
 

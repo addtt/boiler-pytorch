@@ -73,7 +73,6 @@ class Trainer:
 
         assert args.checkpoint_every % args.test_log_every == 0
 
-
         # Pick device (cpu/cuda)
         use_cuda = not args.no_cuda and torch.cuda.is_available()
         self.device = torch.device("cuda" if use_cuda else "cpu")
@@ -154,7 +153,8 @@ class Trainer:
 
                     # Save model checkpoint (unless we just started/resuming training)
                     if not first_step and step % e.args.checkpoint_every == 0:
-                        print("* saving model checkpoint at step {}".format(step))
+                        print("* saving model checkpoint at "
+                              "step {}".format(step))
                         e.model.checkpoint(self.checkpoint_folder,
                                            e.args.keep_checkpoint_max)
 
@@ -221,7 +221,8 @@ class Trainer:
                             pickle.dump(self._history_dict(), fd)
                         if self.tb_writer is not None:
                             for k, v in summaries.items():
-                                self.tb_writer.add_scalar('train_' + k, v, step + 1)
+                                self.tb_writer.add_scalar(
+                                    'train_' + k, v, step + 1)
 
                 # Optimization step
                 e.optimizer.step()

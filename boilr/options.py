@@ -2,7 +2,6 @@
 
 from copy import deepcopy
 
-
 # Actual options
 _options = {
     'model_print_depth': 3,

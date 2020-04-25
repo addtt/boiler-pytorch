@@ -97,8 +97,8 @@ class BaseOfflineEvaluator:  # TODO test this in example.py
                             type=int,
                             dest='load_step',
                             metavar='N',
-                            help='step of checkpoint to be loaded (default: last'
-                                 'available)')
+                            help='step of checkpoint to be loaded (default:'
+                            ' last available)')
         parser.add_argument('--test-batch-size',
                             type=int,
                             default=-1,
