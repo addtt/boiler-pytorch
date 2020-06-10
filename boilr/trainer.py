@@ -185,6 +185,10 @@ class Trainer:
 
                 e.post_backward_callback()
 
+                if e.args.max_grad_norm is not None:
+                    torch.nn.utils.clip_grad_norm_(
+                        e.model.parameters(), max_norm=e.args.max_grad_norm)
+
                 # Add batch metrics to summarizers
                 metrics_dict = e.get_metrics_dict(outputs)
                 train_summarizers.add(metrics_dict)

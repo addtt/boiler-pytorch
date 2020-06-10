@@ -51,6 +51,7 @@ class BaseExperimentManager:
         batch_size=None,
         test_batch_size=None,
         lr=None,
+        max_grad_norm=None,
         max_epochs=10000000,
         max_steps=10000000000,
         seed=54321,
@@ -67,6 +68,7 @@ class BaseExperimentManager:
             batch_size (int, optional):
             test_batch_size (int, optional):
             lr (float, optional):
+            max_grad_norm (float, optional):
             max_epochs (int, optional):
             max_steps (int, optional):
             seed (int, optional):
@@ -97,6 +99,14 @@ class BaseExperimentManager:
                             metavar='LR',
                             dest='lr',
                             help='learning rate')
+
+        parser.add_argument('--max-grad-norm',
+                            type=float,
+                            default=None,
+                            metavar='NORM',
+                            dest='max_grad_norm',
+                            help='maximum global norm of the gradient '
+                                 '(clipped if larger)')
 
         parser.add_argument('--seed',
                             type=int,
@@ -214,6 +224,9 @@ class BaseExperimentManager:
                    " but current values are {tr} and {ts}")
             msg = msg.format(tr=args.test_log_every, ts=args.train_log_every)
             raise ValueError(msg)
+
+        if args.max_grad_norm is not None:
+            assert args.max_grad_norm > 0.0
 
     @staticmethod
     def _make_run_description(args):
