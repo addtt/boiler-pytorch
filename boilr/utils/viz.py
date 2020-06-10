@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torchvision.utils import make_grid
+from torchvision.utils import save_image
 
 from boilr.nn.utils import named_leaf_modules
 
@@ -135,6 +136,11 @@ def img_grid_pad_value(imgs, thresh=.2):
     if torch.median(borders) < thresh:
         return 1.0
     return 0.0
+
+
+def save_images(images, filename, n=8):
+    pad = img_grid_pad_value(images)
+    save_image(images, filename, nrow=n, pad_value=pad)
 
 
 def balanced_approx_factorization(x, ratio=1):

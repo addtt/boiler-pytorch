@@ -2,11 +2,10 @@ import os
 
 import torch
 from torch import optim
-from torchvision.utils import save_image
 
 import boilr
 from boilr import VIExperimentManager
-from boilr.utils.viz import img_grid_pad_value
+from boilr.utils.viz import save_images
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
@@ -96,11 +95,10 @@ class MnistExperiment(VIExperimentManager):
             self.save_input_and_recons(x, fname, n)
 
     def save_samples(self, fname, n=8):
-        sample = self.model.sample_prior(n ** 2)
-        pad = img_grid_pad_value(sample)
-        save_image(sample, fname, nrow=n, pad_value=pad)
+        samples = self.model.sample_prior(n ** 2)
+        save_images(samples, fname, n=n)
 
-    def save_input_and_recons(self, x, fname, n):
+    def save_input_and_recons(self, x, fname, n=8):
         n_img = n ** 2 // 2
         if x.shape[0] < n_img:
             msg = ("{} data points required, but given batch has size {}. "
@@ -113,9 +111,7 @@ class MnistExperiment(VIExperimentManager):
         imgs = torch.stack([x.cpu(), recons.cpu()])
         imgs = imgs.permute(1, 0, 2, 3, 4)
         imgs = imgs.reshape(n ** 2, x.size(1), x.size(2), x.size(3))
-        pad = img_grid_pad_value(imgs)
-        save_image(imgs, fname, nrow=n, pad_value=pad)
-
+        save_images(imgs, fname, n=n)
 
     def _parse_args(self, parser):
         """
