@@ -85,18 +85,20 @@ class MnistExperiment(VIExperimentManager):
             n = 8
 
             # Save model samples
-            sample = self.model.sample_prior(n ** 2)
             fname = os.path.join(img_folder, 'sample_' + str(step) + '.png')
-            pad = img_grid_pad_value(sample)
-            save_image(sample, fname, nrow=n, pad_value=pad)
+            self.save_samples(fname, n)
 
             # Get first test batch
             (x, _) = next(iter(self.dataloaders.test))
-            fname = os.path.join(img_folder, 'reconstruction_' + str(step) + '.png')
 
             # Save model original/reconstructions
+            fname = os.path.join(img_folder, 'reconstruction_' + str(step) + '.png')
             self.save_input_and_recons(x, fname, n)
 
+    def save_samples(self, fname, n=8):
+        sample = self.model.sample_prior(n ** 2)
+        pad = img_grid_pad_value(sample)
+        save_image(sample, fname, nrow=n, pad_value=pad)
 
     def save_input_and_recons(self, x, fname, n):
         n_img = n ** 2 // 2
