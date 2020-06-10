@@ -154,6 +154,26 @@ def save_image_grid(images, filename, n=8):
     save_image(images, filename, nrow=n, pad_value=pad)
 
 
+def save_image_grid_reconstructions(inputs, recons, filename):
+    """Saves a grid of images with inputs and reconstructions.
+
+    This is meant for autoencoder-like models. The number of images is inferred
+    from the input sizes. Inputs and reconstructions must have the same shape.
+
+    Args:
+        inputs (Tensor): batch of input images
+        recons (Tensor): batch of reconstructions
+        filename (str): name of output file
+    """
+    assert inputs.shape == recons.shape
+    n_img = inputs.shape[0]
+    n = int(np.sqrt(2 * n_img))
+    imgs = torch.stack([inputs.cpu(), recons.cpu()])
+    imgs = imgs.permute(1, 0, 2, 3, 4)
+    imgs = imgs.reshape(n ** 2, inputs.size(1), inputs.size(2), inputs.size(3))
+    save_image_grid(imgs, filename, n=n)
+
+
 def balanced_approx_factorization(x, ratio=1):
     """Approximately factorize an integer into integers.
 
