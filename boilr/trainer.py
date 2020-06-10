@@ -14,6 +14,7 @@ except ImportError as e:
     have_tensorboard = False
 from tqdm import tqdm
 
+from boilr.nn.utils import grad_norm
 from boilr.options import get_option
 from boilr.utils import set_rnd_seed, get_date_str
 from boilr.utils import viz
@@ -130,6 +131,9 @@ class Trainer:
         train_summarizers = SummarizerCollection(
             mode='moving_average',
             ma_length=get_option('train_summarizer_ma_length'))
+        grad_summarizers = SummarizerCollection(
+            mode='moving_average',
+            ma_length=get_option('train_summarizer_ma_length'))
         progress = None
 
         # Training mode
@@ -185,6 +189,19 @@ class Trainer:
                 metrics_dict = e.get_metrics_dict(outputs)
                 train_summarizers.add(metrics_dict)
 
+                # Compute gradient stats and add to summarizers
+                # - grad norm of each parameter
+                # - grad norm of given group (or default groups)
+                # - total grad norm
+                grad_stats = dict()
+                grad_stats['grad_norm_total/grad_norm_total'] = \
+                    grad_norm(e.model.parameters())
+                for n, p in e.model.named_parameters():
+                    k = 'grad_norm_per_parameter/' + n
+                    grad_stats[k] = grad_norm(p)
+                # TODO groups
+                grad_summarizers.add(grad_stats)
+
                 # Update progress bar
                 progress.update()
 
@@ -198,6 +215,7 @@ class Trainer:
 
                     # Get moving average of training metrics and reset summarizers
                     summaries = train_summarizers.get_all(reset=True)
+                    grad_summaries = grad_summarizers.get_all(reset=True)
 
                     # Print summaries
                     print(e.train_log_str(summaries, step + 1, epoch))
@@ -223,6 +241,8 @@ class Trainer:
                             for k, v in summaries.items():
                                 self.tb_writer.add_scalar(
                                     'train_' + k, v, step + 1)
+                            for k, v in grad_summaries.items():
+                                self.tb_writer.add_scalar(k, v, step + 1)
 
                 # Optimization step
                 e.optimizer.step()
