@@ -28,7 +28,6 @@ class Evaluator(BaseOfflineEvaluator):
         fname = os.path.join(self._img_folder, "reconstructions.png")
         experiment.save_input_and_recons(x, fname, n=8)
 
-
     def _parse_args(self):
 
         parser = argparse.ArgumentParser(
@@ -39,14 +38,14 @@ class Evaluator(BaseOfflineEvaluator):
         parser.add_argument('--ll',
                             action='store_true',
                             help="estimate log likelihood with importance-"
-                                 "weighted bound")
+                            "weighted bound")
         parser.add_argument('--ll-samples',
                             type=int,
                             default=100,
                             dest='ll_samples',
                             metavar='N',
                             help="number of importance-weighted samples for "
-                                 "log likelihood estimation")
+                            "log likelihood estimation")
         parser.add_argument('--ps',
                             type=int,
                             default=1,
@@ -66,10 +65,10 @@ class Evaluator(BaseOfflineEvaluator):
         return args
 
 
-
 def main():
     evaluator = Evaluator(MnistExperiment)
     evaluator()
+
 
 if __name__ == "__main__":
     main()

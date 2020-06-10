@@ -62,8 +62,7 @@ def checkpoints_in_folder(folder):
     def is_checkpoint_file(f):
         # TODO use regex properly and maybe get number directly here
         full_path = os.path.join(folder, f)
-        return (os.path.isfile(full_path) and
-                f.startswith("model_") and
+        return (os.path.isfile(full_path) and f.startswith("model_") and
                 f.endswith('.pt'))
 
     filenames = [f for f in os.listdir(folder) if is_checkpoint_file(f)]

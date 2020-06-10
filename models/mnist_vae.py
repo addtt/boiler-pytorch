@@ -6,6 +6,7 @@ from boilr.models import BaseGenerativeModel
 
 data_std = .02
 
+
 class MnistVAE(BaseGenerativeModel):
 
     def __init__(self, z_dim=8):
@@ -32,7 +33,6 @@ class MnistVAE(BaseGenerativeModel):
             nn.Sigmoid(),
         )
 
-
     def forward(self, x):
         x_flat = x.view(x.size(0), -1)
         mu, lv = torch.chunk(self.encoder(x_flat), 2, dim=1)
@@ -50,7 +50,6 @@ class MnistVAE(BaseGenerativeModel):
             'kl': kl,
             'elbo': elbo,
         }
-
 
     def sample_prior(self, n_imgs, **kwargs):
         z = self.pz.sample([n_imgs, self.z_dim]).to(self.get_device())

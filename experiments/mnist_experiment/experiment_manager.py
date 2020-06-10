@@ -12,6 +12,7 @@ from .data import DatasetManager
 boilr.set_options(model_print_depth=2)
 # boilr.set_options(show_progress_bar=False)
 
+
 class MnistExperiment(VIExperimentManager):
     """
     Experiment manager.
@@ -41,7 +42,6 @@ class MnistExperiment(VIExperimentManager):
                           lr=self.args.lr,
                           weight_decay=self.args.weight_decay)
 
-
     def forward_pass(self, x, y=None):
         """
         Simple single-pass model evaluation. It consists of a forward pass
@@ -52,7 +52,7 @@ class MnistExperiment(VIExperimentManager):
         out = self.model(x)
         elbo_sep = out['elbo']
         elbo = elbo_sep.mean()
-        loss = - elbo
+        loss = -elbo
 
         out = {
             'out_sample': out['sample'],
@@ -64,7 +64,6 @@ class MnistExperiment(VIExperimentManager):
             'elbo/kl': out['kl'].mean(),
         }
         return out
-
 
     def save_images(self, img_folder):
         """
@@ -91,15 +90,16 @@ class MnistExperiment(VIExperimentManager):
             (x, _) = next(iter(self.dataloaders.test))
 
             # Save model original/reconstructions
-            fname = os.path.join(img_folder, 'reconstruction_' + str(step) + '.png')
+            fname = os.path.join(img_folder,
+                                 'reconstruction_' + str(step) + '.png')
             self.save_input_and_recons(x, fname, n)
 
     def save_samples(self, fname, n=8):
-        samples = self.model.sample_prior(n ** 2)
+        samples = self.model.sample_prior(n**2)
         save_image_grid(samples, fname, n=n)
 
     def save_input_and_recons(self, x, fname, n=8):
-        n_img = n ** 2 // 2
+        n_img = n**2 // 2
         if x.shape[0] < n_img:
             msg = ("{} data points required, but given batch has size {}. "
                    "Please use a larger batch.".format(n_img, x.shape[0]))
@@ -110,7 +110,7 @@ class MnistExperiment(VIExperimentManager):
         recons = outputs['out_sample'][:n_img]
         imgs = torch.stack([x.cpu(), recons.cpu()])
         imgs = imgs.permute(1, 0, 2, 3, 4)
-        imgs = imgs.reshape(n ** 2, x.size(1), x.size(2), x.size(3))
+        imgs = imgs.reshape(n**2, x.size(1), x.size(2), x.size(3))
         save_image_grid(imgs, fname, n=n)
 
     def _parse_args(self, parser):
@@ -122,21 +122,23 @@ class MnistExperiment(VIExperimentManager):
         :return: args: argparse.Namespace with experiment settings
         """
 
-        self.add_required_args(parser,
+        self.add_required_args(
+            parser,
 
-                               # General
-                               batch_size=64,
-                               test_batch_size=1000,
-                               lr=1e-3,
-                               seed=54321,
-                               train_log_every=1000,
-                               test_log_every=1000,
-                               checkpoint_every=10000,
-                               resume="",
+            # General
+            batch_size=64,
+            test_batch_size=1000,
+            lr=1e-3,
+            seed=54321,
+            train_log_every=1000,
+            test_log_every=1000,
+            checkpoint_every=10000,
+            resume="",
 
-                               # VI-specific
-                               loglikelihood_every=50000,
-                               loglikelihood_samples=100, )
+            # VI-specific
+            loglikelihood_every=50000,
+            loglikelihood_samples=100,
+        )
 
         parser.add_argument('--wd',
                             type=float,

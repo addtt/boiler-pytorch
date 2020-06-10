@@ -5,6 +5,7 @@ from boilr.data import BaseDatasetManager
 
 path = 'data'
 
+
 class DatasetManager(BaseDatasetManager):
 
     @classmethod

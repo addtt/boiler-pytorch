@@ -107,7 +107,7 @@ class BaseExperimentManager:
                             metavar='NORM',
                             dest='max_grad_norm',
                             help='maximum global norm of the gradient '
-                                 '(clipped if larger)')
+                            '(clipped if larger)')
 
         parser.add_argument('--seed',
                             type=int,

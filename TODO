@@ -1,0 +1,2 @@
+* learning rate decay either exp or stepwise with long steps
+* reinit optimizer when doing these steps?
