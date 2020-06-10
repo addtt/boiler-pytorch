@@ -6,4 +6,5 @@ checkpoints
 data
 results
 tensorboard_logs
+evaluation_results
 
