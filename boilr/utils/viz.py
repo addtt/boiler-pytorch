@@ -138,7 +138,18 @@ def img_grid_pad_value(imgs, thresh=.2):
     return 0.0
 
 
-def save_images(images, filename, n=8):
+def save_image_grid(images, filename, n=8):
+    """Saves a grid of images.
+
+    Wrapper around torchvision save_image. The grid lines are either black or
+    white depending on the image colors.
+
+    Args:
+        images (Tensor): batch of images (N, channels, H, W)
+        filename (str): name of output file
+        n (int, optional): number of rows and columns. The number of images is
+            the square of this.
+    """
     pad = img_grid_pad_value(images)
     save_image(images, filename, nrow=n, pad_value=pad)
 

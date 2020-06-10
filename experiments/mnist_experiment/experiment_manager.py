@@ -5,7 +5,7 @@ from torch import optim
 
 import boilr
 from boilr import VIExperimentManager
-from boilr.utils.viz import save_images
+from boilr.utils.viz import save_image_grid
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
@@ -96,7 +96,7 @@ class MnistExperiment(VIExperimentManager):
 
     def save_samples(self, fname, n=8):
         samples = self.model.sample_prior(n ** 2)
-        save_images(samples, fname, n=n)
+        save_image_grid(samples, fname, n=n)
 
     def save_input_and_recons(self, x, fname, n=8):
         n_img = n ** 2 // 2
@@ -111,7 +111,7 @@ class MnistExperiment(VIExperimentManager):
         imgs = torch.stack([x.cpu(), recons.cpu()])
         imgs = imgs.permute(1, 0, 2, 3, 4)
         imgs = imgs.reshape(n ** 2, x.size(1), x.size(2), x.size(3))
-        save_images(imgs, fname, n=n)
+        save_image_grid(imgs, fname, n=n)
 
     def _parse_args(self, parser):
         """
