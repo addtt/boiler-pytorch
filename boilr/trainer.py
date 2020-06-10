@@ -135,6 +135,7 @@ class Trainer:
             mode='moving_average',
             ma_length=get_option('train_summarizer_ma_length'))
         progress = None
+        show_progress = get_option('show_progress_bar')
 
         # Training mode
         e.model.train()
@@ -162,8 +163,10 @@ class Trainer:
                         e.model.checkpoint(self.checkpoint_folder,
                                            e.args.keep_checkpoint_max)
 
-                    # Restart progress bar
-                    progress = tqdm(total=e.args.test_log_every, desc='train')
+                    # (Re)start progress bar
+                    if show_progress:
+                        progress = tqdm(total=e.args.test_log_every,
+                                        desc='train')
 
                     # Restart timer to measure training speed
                     timer_start = timeit.default_timer()
@@ -207,10 +210,12 @@ class Trainer:
                 grad_summarizers.add(grad_stats)
 
                 # Update progress bar
-                progress.update()
+                if show_progress:
+                    progress.update()
 
                 # Close progress bar if test occurs at next loop iteration
                 if (step + 1) % e.args.test_log_every == 0:
+                    # If show_progress is False, progress is None
                     if progress is not None:
                         progress.close()
 
@@ -259,7 +264,7 @@ class Trainer:
             if step >= e.args.max_steps:
                 break
 
-        if progress is not None:
+        if progress is not None:  # if show_progress is False, progress is None
             progress.close()
         if step < e.args.max_steps:
             print("Reached epochs limit ({} epochs)".format(e.args.max_epochs))

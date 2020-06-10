@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from boilr.nn.utils import print_num_params
 from boilr.utils.summarize import SummarizerCollection
+from boilr.options import get_option
 
 
 class BaseExperimentManager:
@@ -357,7 +358,11 @@ class BaseExperimentManager:
     @classmethod
     def train_log_str(cls, summaries, step, epoch=None):
         """Returns log string for training metrics."""
-        s = "       [step {}]".format(step)
+        if get_option('show_progress_bar'):
+            s = "       "
+        else:
+            s = "train: "
+        s += "[step {}]".format(step)
         for k in summaries:
             s += "  {key}={value:.5g}".format(key=k, value=summaries[k])
         return s
@@ -365,7 +370,10 @@ class BaseExperimentManager:
     @classmethod
     def test_log_str(cls, summaries, step, epoch=None):
         """Returns log string for test metrics."""
-        s = "       "
+        if get_option('show_progress_bar'):
+            s = "       "
+        else:
+            s = "test : "
         if epoch is not None:
             s += "[step {}, epoch {}]".format(step, epoch)
         for k in summaries:
@@ -456,7 +464,9 @@ class VIExperimentManager(BaseExperimentManager):
 
         # Setup
         summarizers = SummarizerCollection(mode='sum')
-        progress = tqdm(total=len(test_loader) * iw_samples, desc='test ')
+        show_progress = get_option('show_progress_bar')
+        if show_progress:
+            progress = tqdm(total=len(test_loader) * iw_samples, desc='test ')
         all_elbo_sep = torch.zeros(n_test, iw_samples)
 
         # Do test
@@ -475,8 +485,11 @@ class VIExperimentManager(BaseExperimentManager):
                     metrics_dict[k] *= multiplier
                 summarizers.add(metrics_dict)
 
-                progress.update()
-        progress.close()
+                if show_progress:
+                    progress.update()
+
+        if show_progress:
+            progress.close()
 
         if iw_samples > 1:
             # Shape (test set size,)

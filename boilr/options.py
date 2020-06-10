@@ -1,16 +1,17 @@
-"""Packagewide options."""
+"""Package-wide options."""
 
 from copy import deepcopy
 
-# Actual options
+# Define options and set default values
 _options = {
     'model_print_depth': 3,
     'train_summarizer_ma_length': 1000,
+    'show_progress_bar': True,
 }
 
 
 def set_options(**kwargs):
-    """Sets specified packagewide options.
+    """Sets specified package-wide options.
 
     Args:
         **kwargs: keyword arguments defining options that have to be updated.
@@ -93,5 +94,7 @@ def _check_option(name, value):
         return isinstance(value, int) and value > 0
     elif name == 'train_summarizer_ma_length':
         return isinstance(value, int) and value > 0
+    elif name == 'show_progress_bar':
+        return isinstance(value, bool)
     else:
         raise ValueError("Unknown option name {}".format(repr(name)))

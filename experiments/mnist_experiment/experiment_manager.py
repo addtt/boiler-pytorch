@@ -11,6 +11,7 @@ from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
 boilr.set_options(model_print_depth=2)
+# boilr.set_options(show_progress_bar=False)
 
 class MnistExperiment(VIExperimentManager):
     """
