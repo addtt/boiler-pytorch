@@ -49,17 +49,37 @@ def print_num_params(model, max_depth=__sentinel):
     print("---------\n")
 
 
-def grad_norm(parameters, norm_type=2):
-    """Compute gradient norm of an iterable of parameters.
+def grad_global_norm(parameters, norm_type=2):
+    """Compute global norm of the gradients of an iterable of parameters.
 
     The norm is computed over all gradients together, as if they were
-    concatenated into a single vector. Gradients are modified in-place.
-    This code is based on torch.nn.utils.clip_grad_norm_(), with minor
-    modifications.
+    concatenated into a single vector.
 
     Args:
         parameters (Iterable[Tensor] or Tensor): an iterable of Tensors or a
-            single Tensor that will have gradients normalized
+            single Tensor
+        norm_type (float or int, optional): type of the used p-norm. Can be
+            ``'inf'`` for infinity norm.
+
+    Returns:
+        Global norm of the parameters' gradients (viewed as a single vector).
+    """
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+    grads = [p.grad for p in parameters if p.grad is not None]
+    return global_norm(grads, norm_type=norm_type)
+
+
+def global_norm(parameters, norm_type=2):
+    """Compute global norm of an iterable of parameters.
+
+    The norm is computed over all tensors together, as if they were
+    concatenated into a single vector. This code is based on
+    torch.nn.utils.clip_grad_norm_().
+
+    Args:
+        parameters (Iterable[Tensor] or Tensor): an iterable of Tensors or a
+            single Tensor
         norm_type (float or int, optional): type of the used p-norm. Can be
             ``'inf'`` for infinity norm.
 
@@ -68,14 +88,13 @@ def grad_norm(parameters, norm_type=2):
     """
     if isinstance(parameters, torch.Tensor):
         parameters = [parameters]
-    parameters = list(filter(lambda p: p.grad is not None, parameters))
     norm_type = float(norm_type)
     if norm_type == math.inf:
-        total_norm = max(p.grad.data.abs().max() for p in parameters)
+        total_norm = max(p.data.abs().max() for p in parameters)
     else:
-        total_norm = 0
+        total_norm = 0.
         for p in parameters:
-            param_norm = p.grad.data.norm(norm_type)
+            param_norm = p.data.norm(norm_type)
             total_norm += param_norm.item()**norm_type
         total_norm = total_norm**(1. / norm_type)
     return total_norm
