@@ -58,9 +58,9 @@ class BaseExperimentManager:
         max_epochs=10000000,
         max_steps=10000000000,
         seed=54321,
-        train_log_every=10000,
-        test_log_every=10000,
-        checkpoint_every=100000,
+        train_log_every=1000,
+        test_log_every=1000,
+        checkpoint_every=10000,
         keep_checkpoint_max=3,
         resume="",
     ):
@@ -394,7 +394,7 @@ class BaseExperimentManager:
         - passed to test_log_str() to get the string that will be printed to
           output (by default all summaries are printed)
         - saved to the history of test metrics, which is saved to disk
-        - logged to tensorboard (with 'validation_' pre-prended to the key)
+        - logged to tensorboard (with 'validation_' prepended to the key)
 
         Returns:
             summaries (dict)
