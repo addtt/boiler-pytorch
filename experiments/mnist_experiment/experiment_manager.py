@@ -1,10 +1,7 @@
-import os
-
 from torch import optim
 
 import boilr
-from boilr import VIExperimentManager
-from boilr.utils.viz import save_image_grid, save_image_grid_reconstructions
+from boilr import VAEExperimentManager
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
 
@@ -12,7 +9,7 @@ boilr.set_options(model_print_depth=2)
 # boilr.set_options(show_progress_bar=False)
 
 
-class MnistExperiment(VIExperimentManager):
+class MnistExperiment(VAEExperimentManager):
     """
     Experiment manager.
 
@@ -63,51 +60,6 @@ class MnistExperiment(VIExperimentManager):
             'elbo/kl': out['kl'].mean(),
         }
         return out
-
-    def save_images(self, img_folder):
-        """
-        Save test images.
-
-        In this case, save samples from the generative model, and pairs
-        input/reconstruction from the test set.
-
-        :param img_folder: folder to store images
-        """
-
-        step = self.model.global_step
-
-        if not self.args.dry_run:
-
-            # Saved images will have n**2 sub-images
-            n = 8
-
-            # Save model samples
-            fname = os.path.join(img_folder, 'sample_' + str(step) + '.png')
-            self.save_samples(fname, n)
-
-            # Get first test batch
-            (x, _) = next(iter(self.dataloaders.test))
-
-            # Save model original/reconstructions
-            fname = os.path.join(img_folder,
-                                 'reconstruction_' + str(step) + '.png')
-            self.save_input_and_recons(x, fname, n)
-
-    def save_samples(self, fname, n=8):
-        samples = self.model.sample_prior(n**2)
-        save_image_grid(samples, fname, n=n)
-
-    def save_input_and_recons(self, x, fname, n=8):
-        n_img = n**2 // 2
-        if x.shape[0] < n_img:
-            msg = ("{} data points required, but given batch has size {}. "
-                   "Please use a larger batch.".format(n_img, x.shape[0]))
-            raise RuntimeError(msg)
-        x = x.to(self.device)
-        outputs = self.forward_pass(x)
-        x = x[:n_img]
-        recons = outputs['out_sample'][:n_img]
-        save_image_grid_reconstructions(x, recons, fname)
 
     def _parse_args(self, parser):
         """

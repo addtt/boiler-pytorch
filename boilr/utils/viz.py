@@ -138,7 +138,7 @@ def img_grid_pad_value(imgs, thresh=.2):
     return 0.0
 
 
-def save_image_grid(images, filename, n=8):
+def save_image_grid(images, filename, nrows=8):
     """Saves a grid of images.
 
     Wrapper around torchvision save_image. The grid lines are either black or
@@ -147,11 +147,11 @@ def save_image_grid(images, filename, n=8):
     Args:
         images (Tensor): batch of images (N, channels, H, W)
         filename (str): name of output file
-        n (int, optional): number of rows and columns. The number of images is
-            the square of this.
+        nrows (int, optional): number of rows and columns. The number of images
+            is the square of this.
     """
     pad = img_grid_pad_value(images)
-    save_image(images, filename, nrow=n, pad_value=pad)
+    save_image(images, filename, nrow=nrows, pad_value=pad)
 
 
 def save_image_grid_reconstructions(inputs, recons, filename):
@@ -170,8 +170,8 @@ def save_image_grid_reconstructions(inputs, recons, filename):
     n = int(np.sqrt(2 * n_img))
     imgs = torch.stack([inputs.cpu(), recons.cpu()])
     imgs = imgs.permute(1, 0, 2, 3, 4)
-    imgs = imgs.reshape(n ** 2, inputs.size(1), inputs.size(2), inputs.size(3))
-    save_image_grid(imgs, filename, n=n)
+    imgs = imgs.reshape(n**2, inputs.size(1), inputs.size(2), inputs.size(3))
+    save_image_grid(imgs, filename, nrows=n)
 
 
 def balanced_approx_factorization(x, ratio=1):

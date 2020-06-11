@@ -283,7 +283,8 @@ class Trainer:
 
         # Save images
         if step % e.args.test_imgs_every == 0:
-            e.save_images(self.img_folder)
+            if not e.args.dry_run:
+                e.save_images(self.img_folder)
 
         # Print log string with test results (experiment-specific)
         print(e.test_log_str(summaries, step, epoch))

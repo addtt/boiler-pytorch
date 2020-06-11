@@ -21,12 +21,12 @@ class Evaluator(BaseOfflineEvaluator):
 
         # Save samples
         fname = os.path.join(self._img_folder, "samples.png")
-        experiment.save_samples(fname, n=8)
+        experiment.generate_and_save_samples(fname, nrows=8)
 
         # Save input and reconstructions
         x, y = next(iter(experiment.dataloaders.test))
         fname = os.path.join(self._img_folder, "reconstructions.png")
-        experiment.save_input_and_recons(x, fname, n=8)
+        experiment.generate_and_save_reconstructions(x, fname, nrows=8)
 
     def _parse_args(self):
 

@@ -1,4 +1,5 @@
 import argparse
+import os
 from numbers import Number
 
 import numpy as np
@@ -6,8 +7,9 @@ import torch
 from tqdm import tqdm
 
 from boilr.nn.utils import print_num_params
-from boilr.utils.summarize import SummarizerCollection
 from boilr.options import get_option
+from boilr.utils.summarize import SummarizerCollection
+from boilr.utils.viz import save_image_grid, save_image_grid_reconstructions
 
 
 class BaseExperimentManager:
@@ -426,10 +428,16 @@ class BaseExperimentManager:
         return self._optimizer
 
 
-class VIExperimentManager(BaseExperimentManager):
-    """Subclass of experiment manager for variational inference.
+class VAEExperimentManager(BaseExperimentManager):
+    """Subclass of experiment manager for variational autoencoders.
 
-    This version implements a default test_procedure for variational inference.
+    This version:
+    - implements a default test_procedure for VAEs,
+    - defines command line arguments and specified defaults (which can be
+      overridden by subclasses),
+    - implements default methods for saving model samples (assuming the model
+      is a generative model) and for saving pairs of input-reconstruction
+      images (assuming it is an autoencoder).
 
     See the superclass docs for more details.
     """
@@ -555,4 +563,61 @@ class VIExperimentManager(BaseExperimentManager):
             raise ValueError(msg)
 
         # Check superclass's arguments
-        super(VIExperimentManager, cls)._check_args(args)
+        super(VAEExperimentManager, cls)._check_args(args)
+
+    def generate_and_save_samples(self, filename, nrows=8):
+        """Default method to generate and save model samples.
+
+        Args:
+            filename (str): file name.
+            nrows (int): number of rows (and columns) of images.
+        """
+        samples = self.model.sample_prior(nrows**2)
+        save_image_grid(samples, filename, nrows=nrows)
+
+    def generate_and_save_reconstructions(self, x, filename, nrows=8):
+        """Default method to generate and save input/reconstruction pairs.
+
+        Args:
+            x (Tensor): a Tensor of input images (N, channels, H, W)
+            filename (str): file name.
+            nrows (int): number of rows (and columns) of images.
+        """
+        n_img = nrows**2 // 2
+        if x.shape[0] < n_img:
+            msg = ("{} data points required, but given batch has size {}. "
+                   "Please use a larger batch.".format(n_img, x.shape[0]))
+            raise RuntimeError(msg)
+        x = x.to(self.device)
+        outputs = self.forward_pass(x)
+        x = x[:n_img]
+        recons = outputs['out_mean'][:n_img]
+        save_image_grid_reconstructions(x, recons, filename)
+
+    def save_images(self, img_folder):
+        """
+        Default method to save test images.
+
+        Saves samples from the generative model, and input/reconstruction
+        pairs from the test set.
+
+        Args:
+            img_folder (str): folder to store images
+        """
+
+        step = self.model.global_step
+
+        # Saved images will have n**2 sub-images
+        nrows = 8
+
+        # Save model samples
+        fname = os.path.join(img_folder, 'sample_' + str(step) + '.png')
+        self.generate_and_save_samples(fname, nrows)
+
+        # Get first test batch
+        (x, _) = next(iter(self.dataloaders.test))
+
+        # Save model original/reconstructions
+        fname = os.path.join(img_folder, 'reconstruction_' + str(step) + '.png')
+
+        self.generate_and_save_reconstructions(x, fname, nrows)
