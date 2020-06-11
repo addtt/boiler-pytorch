@@ -14,7 +14,7 @@ except ImportError as e:
     have_tensorboard = False
 from tqdm import tqdm
 
-from boilr.nn.utils import grad_norm
+from boilr.nn.utils import global_norm, grad_global_norm
 from boilr.options import get_option
 from boilr.utils import set_rnd_seed, get_date_str
 from boilr.utils import viz
@@ -128,14 +128,18 @@ class Trainer:
         # Setup
         e = self.experiment
         train_loader = e.dataloaders.train
+        progress = None
+        show_progress = get_option('show_progress_bar')
         train_summarizers = SummarizerCollection(
             mode='moving_average',
             ma_length=get_option('train_summarizer_ma_length'))
-        grad_summarizers = SummarizerCollection(
+        # Additional summarizers are considered independent of the train/test
+        # regime, they are not printed, they are saved to tensorboard only once
+        # (during training and not testing), and for now they are not saved to
+        # the history.
+        additional_summarizers = SummarizerCollection(
             mode='moving_average',
             ma_length=get_option('train_summarizer_ma_length'))
-        progress = None
-        show_progress = get_option('show_progress_bar')
 
         # Training mode
         e.model.train()
@@ -200,14 +204,19 @@ class Trainer:
                 # - grad norm of each parameter
                 # - grad norm of given group (or default groups)
                 # - total grad norm
-                grad_stats = dict()
-                grad_stats['grad_norm_total/grad_norm_total'] = \
-                    grad_norm(e.model.parameters())
+                # TODO groups
+                grad_stats = {
+                    'grad_norm_total/grad_norm_total':
+                        grad_global_norm(e.model.parameters())
+                }
                 for n, p in e.model.named_parameters():
                     k = 'grad_norm_per_parameter/' + n
-                    grad_stats[k] = grad_norm(p)
-                # TODO groups
-                grad_summarizers.add(grad_stats)
+                    grad_stats[k] = grad_global_norm(p)
+                additional_summarizers.add(grad_stats)
+
+                # Compute L2 norm of parameters and add it to summarizers
+                additional_summarizers.add(
+                    {'L2_norm': global_norm(e.model.parameters())})
 
                 # Update progress bar
                 if show_progress:
@@ -222,35 +231,35 @@ class Trainer:
                 if (step + 1) % e.args.train_log_every == 0:
                     # step+1 because we already did a forward/backward step
 
-                    # Get moving average of training metrics and reset summarizers
-                    summaries = train_summarizers.get_all(reset=True)
-                    grad_summaries = grad_summarizers.get_all(reset=True)
+                    # Get moving average of metrics and reset summarizers
+                    train_summaries = train_summarizers.get_all(reset=True)
+                    additional_summaries = additional_summarizers.get_all(
+                        reset=True)
 
-                    # Print summaries
-                    print(e.train_log_str(summaries, step + 1, epoch))
-
-                    # Get training speed and add it to summaries (for history
-                    # and tensorboard). Do this *after* printing summaries.
+                    # Get training speed and add it to summaries
                     elapsed = timeit.default_timer() - timer_start
                     iterations = e.model.global_step - steps_start
                     steps_per_sec = iterations / elapsed
-                    examples_per_sec = steps_per_sec * e.args.batch_size
-                    summaries['speed/steps_per_sec'] = steps_per_sec
-                    summaries['speed/examples_per_sec'] = examples_per_sec
+                    ex_per_sec = steps_per_sec * e.args.batch_size
+                    additional_summaries['speed/steps_per_sec'] = steps_per_sec
+                    additional_summaries['speed/examples_per_sec'] = ex_per_sec
                     timer_start = timeit.default_timer()
                     steps_start = e.model.global_step
 
+                    # Print summaries
+                    print(e.train_log_str(train_summaries, step + 1, epoch))
+
                     # Add train summaries (smoothed) to history and dump it to
                     # file and to tensorboard if available
-                    self.train_history.add(summaries, step + 1)
+                    self.train_history.add(train_summaries, step + 1)
                     if not e.args.dry_run:
                         with open(self.log_path, 'wb') as fd:
                             pickle.dump(self._history_dict(), fd)
                         if self.tb_writer is not None:
-                            for k, v in summaries.items():
+                            for k, v in train_summaries.items():
                                 self.tb_writer.add_scalar(
                                     'train_' + k, v, step + 1)
-                            for k, v in grad_summaries.items():
+                            for k, v in additional_summaries.items():
                                 self.tb_writer.add_scalar(k, v, step + 1)
 
                 # Optimization step
