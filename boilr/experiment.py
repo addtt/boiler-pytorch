@@ -390,6 +390,12 @@ class BaseExperimentManager:
         interested in repeating this many times to derive the importance-
         weighted ELBO.
 
+        The returned summaries are:
+        - passed to test_log_str() to get the string that will be printed to
+          output (by default all summaries are printed)
+        - saved to the history of test metrics, which is saved to disk
+        - logged to tensorboard (with 'validation_' pre-prended to the key)
+
         Returns:
             summaries (dict)
         """
