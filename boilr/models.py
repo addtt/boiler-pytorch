@@ -13,11 +13,11 @@ class BaseModel(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.global_step = 0
+        self._global_step = 0
 
     def increment_global_step(self):
         """Increments global step by 1."""
-        self.global_step += 1
+        self._global_step += 1
 
     def get_device(self):
         """Returns model device."""
@@ -74,8 +74,13 @@ class BaseModel(nn.Module):
         print("Loading model checkpoint at step {}...".format(step))
         path = os.path.join(ckpt_folder, ckpt_name)
         self.load_state_dict(torch.load(path, map_location=device))
-        self.global_step = step
+        self._global_step = step
         print("Loaded.")
+
+    @property
+    def global_step(self):
+        """Global step."""
+        return self._global_step
 
 
 class BaseGenerativeModel(BaseModel):

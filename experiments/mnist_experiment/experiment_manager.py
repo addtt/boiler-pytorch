@@ -33,7 +33,7 @@ class MnistExperiment(VAEExperimentManager):
     def _make_model(self):
         return MnistVAE()
 
-    def make_optimizer(self):
+    def _make_optimizer(self):
         return optim.Adam(self.model.parameters(),
                           lr=self.args.lr,
                           weight_decay=self.args.weight_decay)

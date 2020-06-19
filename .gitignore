@@ -2,10 +2,7 @@
 .idea
 __pycache__
 *.pyc
-checkpoints
 data
-results
-tensorboard_logs
-evaluation_results
+output
 TODO
 

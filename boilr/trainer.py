@@ -33,12 +33,11 @@ class Trainer:
 
     def __init__(self, experiment):
         self.experiment = experiment
-        args = experiment.args
-        resume = args.resume != ""
+        resume = experiment.args.resume != ""
 
         if resume:
             # Folder string = run name = resume argument
-            folder_str = args.resume
+            folder_str = experiment.args.resume
             print("Resume from '{}'".format(folder_str))
             msg = "When resuming training, the optimizer's state is not restored"
             warnings.warn(msg)
@@ -47,11 +46,7 @@ class Trainer:
             warnings.warn(msg)
 
             # Get all folder names to resume saving results
-            result_folder = os.path.join('results', folder_str)
-            self.img_folder = os.path.join(result_folder, 'imgs')
-            self.checkpoint_folder = os.path.join('checkpoints', folder_str)
-            self.log_path = os.path.join(result_folder, 'log.pkl')
-            tboard_folder = os.path.join('tensorboard_logs', folder_str)
+            tboard_folder = self._setup_paths(folder_str)
             self.tb_writer = None
             if have_tensorboard:  # maybe we didn't have tboard originally
                 os.makedirs(tboard_folder, exist_ok=True)
@@ -60,11 +55,7 @@ class Trainer:
             # Forget about all arguments, load all of them from saved config
             # (the 'resume' argument is overwritten in the process)
             config_path = os.path.join(self.checkpoint_folder, 'config.pkl')
-            with open(config_path, 'rb') as file:
-                args = pickle.load(file)
-            assert not args.dry_run  # this would not make sense
-            # TODO maybe refactor this and make args a property
-            experiment.args = args  # copy them over to the experiment
+            experiment.load_args_from_pickle(config_path)
 
             # Load training and test history from log.pkl
             with open(self.log_path, 'rb') as file:
@@ -72,12 +63,13 @@ class Trainer:
                 self.train_history = History(history['train'])
                 self.test_history = History(history['test'])
 
+        args = experiment.args
+
         assert args.checkpoint_every % args.test_log_every == 0
 
         # Pick device (cpu/cuda)
         use_cuda = not args.no_cuda and torch.cuda.is_available()
         self.device = torch.device("cuda" if use_cuda else "cpu")
-        experiment.device = self.device  # copy device to experiment manager
 
         if not resume:
 
@@ -95,15 +87,13 @@ class Trainer:
             print('Device: {}, start time: {}'.format(self.device, date_str))
 
             # Create folders for logs and results, save config
-            folder_str = date_str + '_' + experiment.run_description
-            result_folder = os.path.join('results', folder_str)
-            self.img_folder = os.path.join(result_folder, 'imgs')
-            self.checkpoint_folder = os.path.join('checkpoints', folder_str)
-            self.log_path = os.path.join(result_folder, 'log.pkl')
-            tboard_folder = os.path.join('tensorboard_logs', folder_str)
+            folder_str = date_str
+            run_descr = experiment.run_description
+            if len(run_descr) > 0:
+                folder_str += '_' + experiment.run_description
+            tboard_folder = self._setup_paths(folder_str)
             self.tb_writer = None
             if not args.dry_run:
-                os.makedirs(result_folder)
                 os.makedirs(self.img_folder)
                 os.makedirs(self.checkpoint_folder)
                 if have_tensorboard:
@@ -114,10 +104,21 @@ class Trainer:
                     pickle.dump(args, fd)
 
         viz.img_folder = self.img_folder
-        experiment.setup(self.checkpoint_folder if resume else None)
+        experiment.setup(
+            device=self.device,
+            checkpoint_folder=self.checkpoint_folder if resume else None)
 
         # Check everything is initialized properly
         self._check_experiment(experiment)
+
+    def _setup_paths(self, folder_str):
+        result_folder = os.path.join('output', 'results', folder_str)
+        self.img_folder = os.path.join(result_folder, 'imgs')
+        self.checkpoint_folder = os.path.join('output', 'checkpoints',
+                                              folder_str)
+        self.log_path = os.path.join(result_folder, 'log.pkl')
+        tboard_folder = os.path.join('output', 'tensorboard_logs', folder_str)
+        return tboard_folder
 
     def run(self):
         """Runs the trainer."""

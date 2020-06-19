@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 from numbers import Number
 
 import numpy as np
@@ -15,36 +16,35 @@ from boilr.utils.viz import save_image_grid, save_image_grid_reconstructions
 class BaseExperimentManager:
     """Base class for experiment manager.
 
-    If 'args' is not given, all config parameters are set based on experiment
-    defaults and user input, using argparse.
+    If `args` is not given, all config parameters are set based on experiment
+    defaults and user input, using `argparse`.
 
     Args:
-        args (argparse.Namespace, optional): Configuration
-
-    Attributes:
-        device (torch.device): Device in use
-        args (argparse.Namespace): Configuration
+        args (argparse.Namespace, optional): Experiment configuration.
     """
 
     def __init__(self, args=None):
         self._dataloaders = None
         self._model = None
         self._optimizer = None
-        self.device = None  # TODO should device and args be here?
-        self.args = args  # TODO should they be properties?
+        self._args = args
         parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             allow_abbrev=False)
         if args is None:
-            self.args = self._parse_args(parser)
+            self._args = self._parse_args(parser)
         self._check_args(self.args)
         self._run_description = self._make_run_description(self.args)
 
     def _parse_args(self, parser):
         """Parses command-line arguments defining experiment settings.
 
+        Args:
+            parser (argparse.ArgumentParser): Argument parser automatically
+                created when initializing the experiment manager.
+
         Returns:
-            args (argparse.Namespace): Experiment settings
+            args (argparse.Namespace): Experiment configuration.
         """
         raise NotImplementedError
 
@@ -64,7 +64,7 @@ class BaseExperimentManager:
         keep_checkpoint_max=3,
         resume="",
     ):
-        """Adds arguments required by BaseExperimentManager to the parser.
+        """Adds to the parser the arguments required by `BaseExperimentManager`.
 
         Args:
             parser (argparse.ArgumentParser):
@@ -235,35 +235,47 @@ class BaseExperimentManager:
     def _make_run_description(args):
         """Creates a string description of the run.
 
+        It is used in the names of the logging folders. By default it returns
+        the empty string.
+
         Args:
-            args (argparse.Namespace): Experiment configuration
+            args (argparse.Namespace): Experiment configuration.
 
         Returns:
-            (str): The run description
+            (str): The run description.
         """
-        raise NotImplementedError
+        return ""
 
     def _make_datamanager(self):
-        """Creates a dataset manager to wrap data loaders."""
+        """Creates a dataset manager to wrap data loaders.
+
+        The dataset manager should subclass `boilr.data.BaseDatasetManager`.
+
+        Returns:
+            dataset_manager (boilr.data.BaseDatasetManager)
+        """
         raise NotImplementedError
 
     def _make_model(self):
         """Creates a model."""
         raise NotImplementedError
 
-    def make_optimizer(self):
+    def _make_optimizer(self):
         """Creates the optimizer."""
         raise NotImplementedError
 
-    def setup(self, checkpoint_folder=None):
-        """Sets the experiment up.
+    def setup(self, device, checkpoint_folder=None):
+        """Sets up the experiment.
 
         Loads the dataset, creates the model, loads the model weights if a
         checkpoint folder is provided, and creates the optimizer.
 
         Args:
+            device (torch.device)
             checkpoint_folder (str, optional)
         """
+
+        self._device = device
 
         # If checkpoint folder is given, load model from there to resume
         resume = checkpoint_folder is not None
@@ -287,13 +299,24 @@ class BaseExperimentManager:
             self.load_model(checkpoint_folder, step=None)
 
         # Optimizer
-        self._optimizer = self.make_optimizer()
+        self._optimizer = self._make_optimizer()
+
+    def load_args_from_pickle(self, config_pickle_path):
+        """Loads experiment config from file when resuming training.
+
+        Args:
+            config_pickle_path (str)
+        """
+        with open(config_pickle_path, 'rb') as file:
+            args = pickle.load(file)
+        assert not args.dry_run  # this would not make sense
+        self._args = args
 
     def load_model(self, checkpoint_folder, step=None):
         """Loads model weights from a checkpoint in the specified folder.
 
         If step is given, it attempts to load the checkpoint at that step.
-        The weights are loaded with map_location=device, where device is the
+        The weights are loaded with `map_location=device`, where device is the
         current device of this experiment.
 
         Args:
@@ -332,7 +355,7 @@ class BaseExperimentManager:
         for tensorboard.
 
         Only scalars accepted, non-scalars are discarded. Actually, anything
-        that either is a scalar or has the method item(). That should include
+        that either is a scalar or has the method `item()`. That should include
         Python scalars, numpy scalars, torch scalars, numpy and torch
         arrays/tensors with one element.
 
@@ -408,14 +431,16 @@ class BaseExperimentManager:
         the model prior. Images are meant to be saved to the image folder
         that is automatically created by the Trainer.
 
+        By default, do nothing.
+
         Args:
             img_folder (str): Folder to store images
         """
-        raise NotImplementedError
+        pass
 
     @property
     def run_description(self):
-        """String description of the run, used e.g. as log folder name."""
+        """String description of the run, used e.g. for the log folder."""
         return self._run_description
 
     @property
@@ -432,6 +457,15 @@ class BaseExperimentManager:
     def optimizer(self):
         """Optimizer."""
         return self._optimizer
+
+    @property
+    def device(self):
+        return self._device
+
+    @property
+    def args(self):
+        """Experiment configuration."""
+        return self._args
 
 
 class VAEExperimentManager(BaseExperimentManager):

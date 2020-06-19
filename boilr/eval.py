@@ -8,7 +8,7 @@ from boilr.utils import viz
 from boilr.utils.utils import get_date_str
 
 
-class BaseOfflineEvaluator:  # TODO test this in example.py
+class BaseOfflineEvaluator:
     """Boilerplate code to run evaluation routines on a trained model.
 
     Initialize with the experiment class used for training (the class, not the
@@ -51,10 +51,11 @@ class BaseOfflineEvaluator:  # TODO test this in example.py
                 "for now. The model will be loaded from the last checkpoint.")
 
         # Get path to load model
-        checkpoint_folder = os.path.join('checkpoints', eval_args.load)
+        checkpoint_folder = os.path.join('output', 'checkpoints',
+                                         eval_args.load)
 
         # Add date string and create folder on evaluation_results
-        self._result_folder = os.path.join('evaluation_results',
+        self._result_folder = os.path.join('output', 'evaluation_results',
                                            date_str + '_' + eval_args.load)
         self._img_folder = os.path.join(self._result_folder, 'imgs')
         os.makedirs(self._result_folder)
@@ -74,9 +75,7 @@ class BaseOfflineEvaluator:  # TODO test this in example.py
         args.dry_run = False
 
         experiment = experiment_class(args=args)
-        experiment.device = device
-
-        experiment.setup(checkpoint_folder)
+        experiment.setup(device=device, checkpoint_folder=checkpoint_folder)
 
         self._experiment = experiment
         self._eval_args = eval_args
