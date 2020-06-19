@@ -47,6 +47,7 @@ The following functionalities are available out-of-the-box:
 In particular `boilr.nn.modules` and `boilr.utils.viz` might be more generally useful.
 - A long list of command-line arguments to control some of the behaviour above. 
 Some arguments are not directly used, but it's convenient to have them already defined: e.g. if a custom `DataLoader` is necessary, the batch size is easily accessible with `args.batch_size`; and when creating the optimizer, the learning rate is `args.lr`. 
+- See `boilr.options` for package-wide options. Usually it's not necessary to change them, but they give some more flexibility.
 
 #### Command-line arguments
 
