@@ -11,8 +11,7 @@ class Evaluator(BaseOfflineEvaluator):
     def run(self):
 
         experiment = self._experiment
-        model = experiment.model
-        model.eval()
+        experiment.model.eval()
 
         # Run evaluation and print results
         results = experiment.test_procedure(

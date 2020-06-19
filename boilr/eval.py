@@ -81,7 +81,7 @@ class BaseOfflineEvaluator:
         self._eval_args = eval_args
 
     def add_required_args(self, parser):
-        """Adds arguments required by BaseExperimentManager to the parser.
+        """Adds to the parser the arguments required by BaseOfflineEvaluator.
 
         Args:
             parser (argparse.ArgumentParser):
@@ -110,17 +110,17 @@ class BaseOfflineEvaluator:
                             help='do not use cuda')
 
     def _parse_args(self):
-        """Parses command-line arguments defining experiment settings.
+        """Parses command-line arguments defining evaluation settings.
 
         Returns:
-            args (argparse.Namespace): Experiment settings
+            args (argparse.Namespace): Evaluation settings.
         """
         raise NotImplementedError
 
     def run(self):
-        """Run evaluator."""
+        """Runs the evaluator."""
         raise NotImplementedError
 
     def __call__(self, *args, **kwargs):
-        """Run evaluator."""
+        """Runs the evaluator."""
         self.run()

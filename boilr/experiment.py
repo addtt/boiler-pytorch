@@ -292,6 +292,8 @@ class BaseExperimentManager:
         # Model
         print("Creating model...")
         self._model = self._make_model().to(self.device)
+
+        # Print model overview
         print_num_params(self.model)
 
         # Load weights if resuming training
