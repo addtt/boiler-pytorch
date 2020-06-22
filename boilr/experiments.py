@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle
 from numbers import Number
+from typing import Optional
 
 import numpy as np
 import torch
@@ -11,11 +12,12 @@ from tqdm import tqdm
 import boilr.data
 from boilr.nn.utils import print_num_params
 from boilr.options import get_option
+from boilr.utils.meta import ObjectWithArgparsedArgs
 from boilr.utils.summarize import SummarizerCollection
 from boilr.utils.viz import save_image_grid, save_image_grid_reconstructions
 
 
-class BaseExperimentManager:
+class BaseExperimentManager(ObjectWithArgparsedArgs):
     """Base class for experiment manager.
 
     If `args` is not given, all config parameters are set based on experiment
@@ -25,38 +27,18 @@ class BaseExperimentManager:
         args (argparse.Namespace, optional): Experiment configuration.
     """
 
-    def __init__(self, args=None):
+    def __init__(self, args: Optional[argparse.Namespace] = None):
+        super(BaseExperimentManager, self).__init__(args=args)
+
         self._dataloaders = None
         self._model = None
         self._optimizer = None
-        self._args = args
-        parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-            allow_abbrev=False)
-        if args is None:
-            self._default_args = self._define_default_args()
-            self._add_args(parser)
-            self._args = parser.parse_args()
-        self._check_args(self.args)
         self._run_description = self._make_run_description(self.args)
 
     @classmethod
-    def _define_default_args(cls) -> dict:
-        """Defines default command-line arguments for this class.
-
-        A subclass must override this method only if 1) the subclass introduces
-        new arguments for which defaults should be set, or 2) the defaults
-        defined here have to be updated.
-
-        All subclasses that override this method *must* call the super method
-        at the beginning of the overriding implementation. The returned
-        dictionary can be updated before being returned. See the implementation
-        in `VAEExperimentManager` for an example.
-
-        Returns:
-            defaults (dict): a dictionary of argument names and default values.
-        """
-        return dict(
+    def _define_args_defaults(cls) -> dict:
+        defaults = super(BaseExperimentManager, cls)._define_args_defaults()
+        defaults.update(
             batch_size=None,
             test_batch_size=None,
             lr=None,
@@ -70,16 +52,11 @@ class BaseExperimentManager:
             keep_checkpoint_max=3,
             resume="",
         )
+        return defaults
 
     def _add_args(self, parser: argparse.ArgumentParser) -> None:
-        """Adds class-specific arguments to the argument parser.
 
-        Subclasses overriding this methods *must* call the super method.
-
-        Args:
-            parser (argparse.ArgumentParser): Argument parser automatically
-                created when initializing the experiment manager.
-        """
+        super(BaseExperimentManager, self)._add_args(parser)
 
         parser.add_argument('--batch-size',
                             type=int,
@@ -200,14 +177,7 @@ class BaseExperimentManager:
 
     @classmethod
     def _check_args(cls, args: argparse.Namespace) -> None:
-        """Checks arguments relevant to this class.
-
-        Subclasses should check their own arguments and must call the super's
-        implementation of this method.
-
-        Args:
-            args (argparse.Namespace)
-        """
+        super(BaseExperimentManager, cls)._check_args(args)
 
         # Default: save images at each test
         if args.test_imgs_every is None:
@@ -265,7 +235,7 @@ class BaseExperimentManager:
 
     def setup(self,
               device: torch.device,
-              checkpoint_folder: str = None) -> None:
+              checkpoint_folder: Optional[str] = None) -> None:
         """Sets up the experiment.
 
         Loads the dataset, creates the model, loads the model weights if a
@@ -315,7 +285,9 @@ class BaseExperimentManager:
         assert not args.dry_run  # this would not make sense
         self._args = args
 
-    def load_model(self, checkpoint_folder: str, step: int = None) -> None:
+    def load_model(self,
+                   checkpoint_folder: str,
+                   step: Optional[int] = None) -> None:
         """Loads model weights from a checkpoint in the specified folder.
 
         If step is given, it attempts to load the checkpoint at that step.
@@ -328,7 +300,9 @@ class BaseExperimentManager:
         """
         self.model.load(checkpoint_folder, self.device, step=step)
 
-    def forward_pass(self, x: torch.Tensor, y: torch.Tensor = None) -> dict:
+    def forward_pass(self,
+                     x: torch.Tensor,
+                     y: Optional[torch.Tensor] = None) -> dict:
         """Simple single-pass model evaluation.
 
         It consists of a forward pass and computation of all necessary losses
@@ -468,11 +442,6 @@ class BaseExperimentManager:
     def device(self) -> torch.device:
         return self._device
 
-    @property
-    def args(self) -> argparse.Namespace:
-        """Experiment configuration."""
-        return self._args
-
 
 class VAEExperimentManager(BaseExperimentManager):
     """Subclass of experiment manager for variational autoencoders.
@@ -559,15 +528,15 @@ class VAEExperimentManager(BaseExperimentManager):
         return summaries
 
     @classmethod
-    def _define_default_args(cls):
-        default_args = super(VAEExperimentManager, cls)._define_default_args()
-        default_args.update(
+    def _define_args_defaults(cls) -> dict:
+        defaults = super(VAEExperimentManager, cls)._define_args_defaults()
+        defaults.update(
             loglikelihood_every=50000,
             loglikelihood_samples=100,
         )
-        return default_args
+        return defaults
 
-    def _add_args(self, parser):
+    def _add_args(self, parser: argparse.ArgumentParser) -> None:
 
         super(VAEExperimentManager, self)._add_args(parser)
 
@@ -588,7 +557,7 @@ class VAEExperimentManager(BaseExperimentManager):
                             'evaluate log likelihood')
 
     @classmethod
-    def _check_args(cls, args):
+    def _check_args(cls, args: argparse.Namespace) -> None:
 
         if args.loglikelihood_every % args.test_log_every != 0:
             msg = ("'loglikelihood_every' must be a multiple of "

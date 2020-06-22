@@ -115,27 +115,27 @@ In addition, `boilr.models.BaseGenerativeModel` (subclassing `BaseModel`) define
 #### Experiment manager class (3)
 
 One of the base experiment classes in `boilr.experiments` must be subclassed. The subclass *must* implement:
-- `_parse_args` to parse command-line arguments
-- `_make_datamanager` to create the dataset manager, which should subclass `boilr.data.BaseDatasetManager`
-- `_make_model` to create the model, which should subclass `boilr.models.BaseModel`
-- `_make_optimizer` to create the optimizer, which should subclass `torch.optim.optimizer.Optimizer`
-- `forward_pass` to perform a simple single-pass model evaluation and returns losses and metrics
-- `test_procedure` to evaluate the model on the test set (usually heavily based on the `forward_pass` method)
+- `_make_datamanager` to create the dataset manager, which should subclass `boilr.data.BaseDatasetManager`;
+- `_make_model` to create the model, which should subclass `boilr.models.BaseModel`;
+- `_make_optimizer` to create the optimizer, which should subclass `torch.optim.optimizer.Optimizer`;
+- `forward_pass` to perform a simple single-pass model evaluation and returns losses and metrics;
+- `test_procedure` to evaluate the model on the test set (usually heavily based on the `forward_pass` method).
 
 Typically should be overridden:
-- `_make_run_description` which returns a string description of the run, used for output folders
-- `save_images` to save output images (e.g. reconstructions and samples in VAEs)
+- `_define_args_defaults`, `_add_args`, and `_check_args` (or a subset of these) to manage parsing of command-line arguments;
+- `_make_run_description` which returns a string description of the run, used for output folders;
+- `save_images` to save output images (e.g. reconstructions and samples in VAEs).
 
-Can be overridden for additional control:
-- `post_backward_callback` is called by the `Trainer` after the backward pass but before the optimization step
-- `get_metrics_dict` translates a dictionary of results to a dictionary of metrics to be logged (by default this simply copies over the keys)
-- `train_log_str` and `test_log_str` return log strings for test and training metrics
+May be overridden for additional control:
+- `post_backward_callback` is called by the `Trainer` after the backward pass but before the optimization step;
+- `get_metrics_dict` translates a dictionary of results to a dictionary of metrics to be logged (by default this simply copies over the keys);
+- `train_log_str` and `test_log_str` return log strings for test and training metrics.
 
 **Note**: The class `VAEExperimentManager` implements default `test_procedure` and `save_images` 
 methods for variational inference with VAEs.
 
 
-#### Example script (4)
+#### Example training script (4)
 
 ```python
 from boilr import Trainer
@@ -152,8 +152,8 @@ if __name__ == "__main__":
 
 If offline evaluation is necessary, `boilr.eval.BaseOfflineEvaluator` can be subclassed by
 implementing:
-- `_parse_args` to parse command-line arguments related to evaluation (independent of the arguments set up for training);
-- `run` to run the evaluation.
+- `run` to run the evaluation;
+- as above, `_define_args_defaults`, `_add_args`, and `_check_args` (or a subset of these) to manage parsing of command-line arguments.
 The method `run` can be executed by simply calling the evaluator object.
 
 

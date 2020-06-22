@@ -1,3 +1,5 @@
+import argparse
+
 from torch import optim
 
 import boilr
@@ -62,10 +64,9 @@ class MnistExperiment(VAEExperimentManager):
         return out
 
     @classmethod
-    def _define_default_args(cls):
-
-        default_args = super(MnistExperiment, cls)._define_default_args()
-        default_args.update(
+    def _define_args_defaults(cls) -> dict:
+        defaults = super(MnistExperiment, cls)._define_args_defaults()
+        defaults.update(
             # General
             batch_size=64,
             test_batch_size=1000,
@@ -81,9 +82,9 @@ class MnistExperiment(VAEExperimentManager):
             loglikelihood_every=50000,
             loglikelihood_samples=100,
         )
-        return default_args
+        return defaults
 
-    def _add_args(self, parser):
+    def _add_args(self, parser: argparse.ArgumentParser) -> None:
 
         super(MnistExperiment, self)._add_args(parser)
 

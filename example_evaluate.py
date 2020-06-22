@@ -8,14 +8,15 @@ from experiments import MnistExperiment
 
 class Evaluator(BaseOfflineEvaluator):
 
+    # TODO this could mostly be made into a generic VAE evaluator
+
     def run(self):
 
         experiment = self._experiment
         experiment.model.eval()
 
         # Run evaluation and print results
-        results = experiment.test_procedure(
-            iw_samples=self._eval_args.ll_samples)
+        results = experiment.test_procedure(iw_samples=self.args.ll_samples)
         print("Eval results:\n{}".format(results))
 
         # Save samples
@@ -27,12 +28,14 @@ class Evaluator(BaseOfflineEvaluator):
         fname = os.path.join(self._img_folder, "reconstructions.png")
         experiment.generate_and_save_reconstructions(x, fname, nrows=8)
 
-    def _parse_args(self):
+    # @classmethod
+    # def _define_args_defaults(cls) -> dict:
+    #     defaults = super(Evaluator, cls)._define_args_defaults()
+    #     return defaults
 
-        parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    def _add_args(self, parser: argparse.ArgumentParser) -> None:
 
-        self.add_required_args(parser)
+        super(Evaluator, self)._add_args(parser)
 
         parser.add_argument('--ll',
                             action='store_true',
@@ -52,20 +55,21 @@ class Evaluator(BaseOfflineEvaluator):
                             metavar='N',
                             help="number of batches of samples from prior")
 
-        args = parser.parse_args()
-        if args.test_batch_size == -1:
-            args.test_batch_size = None
+    @classmethod
+    def _check_args(cls, args: argparse.Namespace) -> None:
+        super(Evaluator, cls)._check_args(args)
+
+        # TODO rename to check and adjust? adjust args in a different method?
         if not args.ll:
             args.ll_samples = 1
         if args.load_step is not None:
             warnings.warn(
                 "Loading weights from specific training step is not supported "
                 "for now. The model will be loaded from the last checkpoint.")
-        return args
 
 
 def main():
-    evaluator = Evaluator(MnistExperiment)
+    evaluator = Evaluator(experiment_class=MnistExperiment)
     evaluator()
 
 
