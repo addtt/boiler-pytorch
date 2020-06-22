@@ -112,12 +112,12 @@ class Trainer:
         self._check_experiment(experiment)
 
     def _setup_paths(self, folder_str):
-        result_folder = os.path.join('output', 'results', folder_str)
+        result_folder = os.path.join('output', folder_str, 'results')
         self.img_folder = os.path.join(result_folder, 'imgs')
-        self.checkpoint_folder = os.path.join('output', 'checkpoints',
-                                              folder_str)
+        self.checkpoint_folder = os.path.join('output', folder_str,
+                                              'checkpoints')
         self.log_path = os.path.join(result_folder, 'log.pkl')
-        tboard_folder = os.path.join('output', 'tensorboard_logs', folder_str)
+        tboard_folder = os.path.join('output', folder_str, 'tensorboard_logs')
         return tboard_folder
 
     def run(self):

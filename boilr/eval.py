@@ -51,12 +51,13 @@ class BaseOfflineEvaluator:
                 "for now. The model will be loaded from the last checkpoint.")
 
         # Get path to load model
-        checkpoint_folder = os.path.join('output', 'checkpoints',
-                                         eval_args.load)
+        checkpoint_folder = os.path.join('output', eval_args.load,
+                                         'checkpoints')
 
         # Add date string and create folder on evaluation_results
-        self._result_folder = os.path.join('output', 'evaluation_results',
-                                           date_str + '_' + eval_args.load)
+        self._result_folder = os.path.join('output', eval_args.load,
+                                           'evaluation_output',
+                                           'eval_' + date_str)
         self._img_folder = os.path.join(self._result_folder, 'imgs')
         os.makedirs(self._result_folder)
         os.makedirs(self._img_folder)

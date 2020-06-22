@@ -5,8 +5,9 @@ from numbers import Number
 
 import numpy as np
 import torch
-from tqdm import tqdm
 from torch.optim.optimizer import Optimizer
+from tqdm import tqdm
+
 import boilr.data
 from boilr.nn.utils import print_num_params
 from boilr.options import get_option

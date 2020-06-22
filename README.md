@@ -33,7 +33,7 @@ For evaluation:
 ```shell script
 CUDA_VISIBLE_DEVICES=0 python example_evaluate.py --ll --ll-samples 100 --load '$RUN_NAME'
 ```
-using the name of the folder in `output/checkpoints/` generated from running the example.
+using the name of the folder in `output/` generated from running the example.
 
 
 
