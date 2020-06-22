@@ -104,7 +104,7 @@ In addition, `boilr.models.BaseGenerativeModel` (subclassing `BaseModel`) define
 
 #### Experiment manager class (3)
 
-One of the base experiment classes in `boilr.experiment` must be subclassed. The subclass *must* implement:
+One of the base experiment classes in `boilr.experiments` must be subclassed. The subclass *must* implement:
 - `_parse_args` to parse command-line arguments
 - `_make_datamanager` to create the dataset manager, which should subclass `boilr.data.BaseDatasetManager`
 - `_make_model` to create the model, which should subclass `boilr.models.BaseModel`

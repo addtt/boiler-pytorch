@@ -28,7 +28,7 @@ class Trainer:
     experiment object, which is provided at initialization.
 
     Args:
-        experiment (boilr.experiment.BaseExperimentManager)
+        experiment (boilr.experiments.BaseExperimentManager)
     """
 
     def __init__(self, experiment):
