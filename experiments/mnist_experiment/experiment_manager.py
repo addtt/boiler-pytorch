@@ -80,7 +80,8 @@ class MnistExperiment(VAEExperimentManager):
             seed=54321,
             train_log_every=1000,
             test_log_every=1000,
-            checkpoint_every=10000,
+            checkpoint_every=1000,
+            keep_checkpoint_max=3,
             resume="",
 
             # VI-specific

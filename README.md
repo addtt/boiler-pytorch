@@ -11,6 +11,7 @@ share it across projects.
 pip install boilr
 ```
 
+
 ## Usage example/template
 
 There's a usage example that can be useful as template. It's a basic VAE
@@ -26,6 +27,15 @@ Install requirements and run the example:
 pip install -r requirements.txt
 CUDA_VISIBLE_DEVICES=0 python example.py
 ```
+
+For evaluation:
+
+```shell script
+CUDA_VISIBLE_DEVICES=0 python example_evaluate.py --ll --ll-samples 100 --load '$RUN_NAME'
+```
+using the name of the folder in `output/checkpoints/` generated from running the example.
+
+
 
 ## Quick reference
 
@@ -62,7 +72,7 @@ The built-in arguments are the following:
 - `tr-log-every`: log training metrics every this number of training steps (default: 1000)
 - `ts-log-every`: log test metrics every this number of training steps. It must be a multiple of `--tr-log-every` (default: 1000)
 - `ts-img-every`: save test images every this number of training steps. It must be a multiple of `--ts-log-every` (default: same as `--ts-log-every`)
-- `checkpoint-every`: save model checkpoint every this number of training steps (default: 10000)
+- `checkpoint-every`: save model checkpoint every this number of training steps (default: 1000)
 - `keep-checkpoint-max`: keep at most this number of most recent model checkpoints (default: 3)
 - `max-steps`: max number of training steps (default: 1e10)
 - `max-epochs`: max number of training epochs (default: 1e7)
