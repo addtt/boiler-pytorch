@@ -74,6 +74,8 @@ class BaseExperimentManager:
     def _add_args(self, parser: argparse.ArgumentParser) -> None:
         """Adds class-specific arguments to the argument parser.
 
+        Subclasses overriding this methods *must* call the super method.
+
         Args:
             parser (argparse.ArgumentParser): Argument parser automatically
                 created when initializing the experiment manager.
@@ -196,174 +198,11 @@ class BaseExperimentManager:
                             help="load the run with this name and "
                             "resume training")
 
-    # def _parse_args(self, parser):
-    #     """Parses command-line arguments defining experiment settings.
-    #
-    #     Args:
-    #         parser (argparse.ArgumentParser): Argument parser automatically
-    #             created when initializing the experiment manager.
-    #
-    #     Returns:
-    #         args (argparse.Namespace): Experiment configuration.
-    #     """
-    #     raise NotImplementedError
-
-    # def add_required_args(
-    #     self,
-    #     parser,
-    #     batch_size=None,
-    #     test_batch_size=None,
-    #     lr=None,
-    #     max_grad_norm=None,
-    #     max_epochs=10000000,
-    #     max_steps=10000000000,
-    #     seed=54321,
-    #     train_log_every=1000,
-    #     test_log_every=1000,
-    #     checkpoint_every=10000,
-    #     keep_checkpoint_max=3,
-    #     resume="",
-    # ):
-    #     """Adds to the parser the arguments required by `BaseExperimentManager`.
-    #
-    #     Args:
-    #         parser (argparse.ArgumentParser):
-    #         batch_size (int, optional):
-    #         test_batch_size (int, optional):
-    #         lr (float, optional):
-    #         max_grad_norm (float, optional):
-    #         max_epochs (int, optional):
-    #         max_steps (int, optional):
-    #         seed (int, optional):
-    #         train_log_every (int, optional):
-    #         test_log_every (int, optional):
-    #         checkpoint_every (int, optional):
-    #         keep_checkpoint_max (int, optional):
-    #         resume (str, optional):
-    #     """
-    #
-    #     parser.add_argument('--batch-size',
-    #                         type=int,
-    #                         default=batch_size,
-    #                         metavar='N',
-    #                         dest='batch_size',
-    #                         help='training batch size')
-    #
-    #     parser.add_argument('--test-batch-size',
-    #                         type=int,
-    #                         default=test_batch_size,
-    #                         metavar='N',
-    #                         dest='test_batch_size',
-    #                         help='test batch size')
-    #
-    #     parser.add_argument('--lr',
-    #                         type=float,
-    #                         default=lr,
-    #                         metavar='LR',
-    #                         dest='lr',
-    #                         help='learning rate')
-    #
-    #     parser.add_argument('--max-grad-norm',
-    #                         type=float,
-    #                         default=None,
-    #                         metavar='NORM',
-    #                         dest='max_grad_norm',
-    #                         help='maximum global norm of the gradient '
-    #                         '(clipped if larger)')
-    #
-    #     parser.add_argument('--seed',
-    #                         type=int,
-    #                         default=seed,
-    #                         metavar='N',
-    #                         dest='seed',
-    #                         help='random seed')
-    #
-    #     parser.add_argument('--tr-log-every',
-    #                         type=int,
-    #                         default=train_log_every,
-    #                         metavar='N',
-    #                         dest='train_log_every',
-    #                         help='log training metrics every this number of '
-    #                         'training steps')
-    #
-    #     parser.add_argument('--ts-log-every',
-    #                         type=int,
-    #                         default=test_log_every,
-    #                         metavar='N',
-    #                         dest='test_log_every',
-    #                         help="log test metrics every this number of "
-    #                         "training steps. It must be a multiple of "
-    #                         "'--tr-log-every'")
-    #
-    #     parser.add_argument('--ts-img-every',
-    #                         type=int,
-    #                         metavar='N',
-    #                         dest='test_imgs_every',
-    #                         help="save test images every this number of "
-    #                         "training steps. It must be a multiple of "
-    #                         "'--ts-log-every'. Default: same as "
-    #                         "'--ts-log-every'")
-    #
-    #     parser.add_argument('--checkpoint-every',
-    #                         type=int,
-    #                         default=checkpoint_every,
-    #                         metavar='N',
-    #                         dest='checkpoint_every',
-    #                         help='save model checkpoint every this number of '
-    #                         'training steps')
-    #
-    #     parser.add_argument('--keep-checkpoint-max',
-    #                         type=int,
-    #                         default=keep_checkpoint_max,
-    #                         metavar='N',
-    #                         dest='keep_checkpoint_max',
-    #                         help='keep at most this number of most recent '
-    #                         'model checkpoints')
-    #
-    #     parser.add_argument('--max-steps',
-    #                         type=int,
-    #                         default=max_steps,
-    #                         metavar='N',
-    #                         dest='max_steps',
-    #                         help='max number of training steps')
-    #
-    #     parser.add_argument('--max-epochs',
-    #                         type=int,
-    #                         default=max_epochs,
-    #                         metavar='N',
-    #                         dest='max_epochs',
-    #                         help='max number of training epochs')
-    #
-    #     parser.add_argument('--nocuda',
-    #                         action='store_true',
-    #                         dest='no_cuda',
-    #                         help='do not use cuda')
-    #
-    #     parser.add_argument('--descr',
-    #                         type=str,
-    #                         default='',
-    #                         metavar='STR',
-    #                         dest='additional_descr',
-    #                         help='additional description for experiment name')
-    #
-    #     parser.add_argument('--dry-run',
-    #                         action='store_true',
-    #                         dest='dry_run',
-    #                         help='do not save anything to disk')
-    #
-    #     parser.add_argument('--resume',
-    #                         type=str,
-    #                         metavar='NAME',
-    #                         default=resume,
-    #                         dest='resume',
-    #                         help="load the run with this name and "
-    #                         "resume training")
-
     @classmethod
     def _check_args(cls, args: argparse.Namespace) -> None:
         """Checks arguments relevant to this class.
 
-        Subclasses should check their own arguments and call the super's
+        Subclasses should check their own arguments and must call the super's
         implementation of this method.
 
         Args:
