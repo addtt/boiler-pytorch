@@ -38,6 +38,8 @@ class BaseOfflineEvaluator(ObjectWithArgparsedArgs):
     def __init__(self,
                  args: Optional[argparse.Namespace] = None,
                  experiment_class: Type[BaseExperimentManager] = None):
+        if args is not None:
+            warnings.warn("Argument `args` is not used")
         del args
         if experiment_class is None:
             raise ValueError("Argument `experiment_class` cannot be None")

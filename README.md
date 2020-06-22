@@ -15,11 +15,12 @@ pip install boilr
 ## Usage example/template
 
 There's a usage example that can be useful as template. It's a basic VAE
-for MNIST quickly hacked together. The example files/folders are:
+for MNIST quickly hacked together. The example files are:
 - `example.py`
 - `example_evaluate.py`
-- `models/`
-- `experiments/`
+- `experiments/mnist_experiment/data.py`
+- `experiments/mnist_experiment/experiment_manager.py`
+- `models/mnist_vae.py`
 
 Install requirements and run the example:
 
