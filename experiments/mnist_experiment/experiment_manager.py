@@ -61,18 +61,11 @@ class MnistExperiment(VAEExperimentManager):
         }
         return out
 
-    def _parse_args(self, parser):
-        """
-        Parse command-line arguments defining experiment settings.
+    @classmethod
+    def _define_default_args(cls):
 
-        :param: parser
-
-        :return: args: argparse.Namespace with experiment settings
-        """
-
-        self.add_required_args(
-            parser,
-
+        default_args = super(MnistExperiment, cls)._define_default_args()
+        default_args.update(
             # General
             batch_size=64,
             test_batch_size=1000,
@@ -88,16 +81,17 @@ class MnistExperiment(VAEExperimentManager):
             loglikelihood_every=50000,
             loglikelihood_samples=100,
         )
+        return default_args
+
+    def _add_args(self, parser):
+
+        super(MnistExperiment, self)._add_args(parser)
 
         parser.add_argument('--wd',
                             type=float,
                             default=0.0,
                             dest='weight_decay',
                             help='weight decay')
-
-        args = parser.parse_args()
-
-        return args
 
     @staticmethod
     def _make_run_description(args):
