@@ -605,8 +605,27 @@ class VAEExperimentManager(BaseExperimentManager):
             raise RuntimeError(msg)
         x = x.to(self.device)
         outputs = self.forward_pass(x)
+
+        # Try to get reconstruction from different sources in order
+        recons = None
+        possible_recons_names = ['out_recons', 'out_mean', 'out_sample']
+        for key in possible_recons_names:
+            try:
+                recons = outputs[key]
+                if recons is not None:
+                    break  # if we found it and it's not None
+            except KeyError:
+                pass
+        if recons is None:
+            msg = ("Couldn't find reconstruction in the output dictionary. "
+                   "Tried keys: {}".format(possible_recons_names))
+            raise RuntimeError(msg)
+
+        # Pick required number of images
         x = x[:n_img]
-        recons = outputs['out_mean'][:n_img]
+        recons = recons[:n_img]
+
+        # Save inputs and reconstructions in a grid
         save_image_grid_reconstructions(x, recons, filename)
 
     def save_images(self, img_folder: str, nrows: Optional[int] = 8) -> None:
