@@ -2,9 +2,11 @@ import argparse
 import os
 import warnings
 
+import torch
+
 from boilr.eval import BaseOfflineEvaluator
 from experiments import MnistExperiment
-import torch
+
 
 class Evaluator(BaseOfflineEvaluator):
 

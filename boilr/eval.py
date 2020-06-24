@@ -15,19 +15,16 @@ from boilr.utils.utils import get_date_str
 class BaseOfflineEvaluator(ObjectWithArgparsedArgs):
     """Boilerplate code to run evaluation routines on a trained model.
 
-    Initialize with the experiment class used for training (the class, not the
-    instance).
+    Initialize with the experiment class used for training (the class, not the instance).
 
-    A subclass must define:
-    - the _parse_args() method, which is called during init, and must include a
-      call to add_required_args() with the argparser as argument.
-    - the run() method, defining the whole evaluation procedure.
+    A subclass *must* define the `run()` method, defining the whole evaluation procedure.
 
-    The evaluator can then be called directly because it implements __call__().
+    The evaluator can then be called directly (it implements `__call__()`).
 
-    The following data attributes are defined, to be used by subclasses:
-    - self._experiment
-    - self._img_folder
+    Attributes:
+        _experiment
+        _result_folder
+        _img_folder
 
     Args:
         args (argparse.Namespace, optional): Unused.
