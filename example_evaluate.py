@@ -67,6 +67,7 @@ class Evaluator(BaseOfflineEvaluator):
                 "for now. The model will be loaded from the last checkpoint.")
         return args
 
+
 def main():
     evaluator = Evaluator(experiment_class=MnistExperiment)
     evaluator()
