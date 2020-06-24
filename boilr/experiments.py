@@ -311,8 +311,8 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
         and metrics.
 
         Args:
-            x (Tensor): data
-            y (Tensor, optional): labels
+            x (torch.Tensor): data
+            y (torch.Tensor, optional): labels
 
         Returns:
             metrics (dict)
@@ -363,7 +363,7 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
     def train_log_str(cls,
                       summaries: dict,
                       step: int,
-                      epoch: int = None) -> str:
+                      epoch: Optional[int] = None) -> str:
         """Returns log string for training metrics."""
         if get_option('show_progress_bar'):
             s = "       "
@@ -375,7 +375,10 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
         return s
 
     @classmethod
-    def test_log_str(cls, summaries: dict, step: int, epoch: int = None) -> str:
+    def test_log_str(cls,
+                     summaries: dict,
+                     step: int,
+                     epoch: Optional[int] = None) -> str:
         """Returns log string for test metrics."""
         if get_option('show_progress_bar'):
             s = "       "
@@ -459,7 +462,7 @@ class VAEExperimentManager(BaseExperimentManager):
     See the superclass docs for more details.
     """
 
-    def test_procedure(self, iw_samples=None):
+    def test_procedure(self, iw_samples: Optional[int] = None):
         """Executes the experiment's test procedure and returns results.
 
         Collects variational inference metrics on the test set using
@@ -572,12 +575,14 @@ class VAEExperimentManager(BaseExperimentManager):
 
         return args
 
-    def generate_and_save_samples(self, filename: str, nrows: int = 8) -> None:
+    def generate_and_save_samples(self,
+                                  filename: str,
+                                  nrows: Optional[int] = 8) -> None:
         """Default method to generate and save model samples.
 
         Args:
             filename (str): file name.
-            nrows (int): number of rows (and columns) of images.
+            nrows (int, optional): number of rows (and columns) of images.
         """
         samples = self.model.sample_prior(nrows**2)
         save_image_grid(samples, filename, nrows=nrows)
@@ -585,13 +590,13 @@ class VAEExperimentManager(BaseExperimentManager):
     def generate_and_save_reconstructions(self,
                                           x: torch.Tensor,
                                           filename: str,
-                                          nrows: int = 8) -> None:
+                                          nrows: Optional[int] = 8) -> None:
         """Default method to generate and save input/reconstruction pairs.
 
         Args:
-            x (Tensor): a Tensor of input images (N, channels, H, W)
+            x (torch.Tensor): a Tensor of input images (N, channels, H, W)
             filename (str): file name.
-            nrows (int): number of rows (and columns) of images.
+            nrows (int, optional): number of rows (and columns) of images.
         """
         n_img = nrows**2 // 2
         if x.shape[0] < n_img:
@@ -604,21 +609,20 @@ class VAEExperimentManager(BaseExperimentManager):
         recons = outputs['out_mean'][:n_img]
         save_image_grid_reconstructions(x, recons, filename)
 
-    def save_images(self, img_folder: str) -> None:
+    def save_images(self, img_folder: str, nrows: Optional[int] = 8) -> None:
         """
-        Default method to save test images.
+        Default method to save test images for VAE-type models.
 
         Saves samples from the generative model, and input/reconstruction
         pairs from the test set.
 
         Args:
             img_folder (str): Folder to store images
+            nrows (int, optional): number of rows (and columns) of images. Total
+                number of sub-images in each grid will be nrows**2.
         """
 
         step = self.model.global_step
-
-        # Saved images will have n**2 sub-images
-        nrows = 8
 
         # Save model samples
         fname = os.path.join(img_folder, 'sample_' + str(step) + '.png')
