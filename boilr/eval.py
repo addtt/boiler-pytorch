@@ -106,7 +106,8 @@ class BaseOfflineEvaluator(ObjectWithArgparsedArgs):
                             default=self._default_args['test_batch_size'],
                             dest='test_batch_size',
                             metavar='N',
-                            help='test batch size')
+                            help='test batch size (if None, use the same as '
+                            'in the training config)')
         parser.add_argument('--nocuda',
                             action='store_true',
                             dest='no_cuda',
