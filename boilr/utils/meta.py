@@ -19,7 +19,7 @@ class ObjectWithArgparsedArgs:
             self._default_args = self._define_args_defaults()
             self._add_args(parser)
             args = parser.parse_args()
-        self._check_args(args)
+        args = self._check_args(args)
         self._args = args
 
     @classmethod
@@ -51,16 +51,21 @@ class ObjectWithArgparsedArgs:
         pass
 
     @classmethod
-    def _check_args(cls, args: argparse.Namespace) -> None:
-        """Checks arguments relevant to this class.
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+        """Checks and adjusts arguments relevant to this class.
 
         If a subclass overrides this method, it should check its own arguments,
         and it *must* call the super's implementation of this method.
 
         Args:
-            args (argparse.Namespace)
+            args (argparse.Namespace): all arguments, including relevant to
+                subclasses (these will be ignored).
+
+        Returns:
+            args (argparse.Namespace): the arguments themselves, possibly
+                adjusted.
         """
-        pass
+        return args
 
     @property
     def args(self) -> argparse.Namespace:

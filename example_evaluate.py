@@ -56,17 +56,16 @@ class Evaluator(BaseOfflineEvaluator):
                             help="number of batches of samples from prior")
 
     @classmethod
-    def _check_args(cls, args: argparse.Namespace) -> None:
-        super(Evaluator, cls)._check_args(args)
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+        args = super(Evaluator, cls)._check_args(args)
 
-        # TODO rename to check and adjust? adjust args in a different method?
         if not args.ll:
             args.ll_samples = 1
         if args.load_step is not None:
             warnings.warn(
                 "Loading weights from specific training step is not supported "
                 "for now. The model will be loaded from the last checkpoint.")
-
+        return args
 
 def main():
     evaluator = Evaluator(experiment_class=MnistExperiment)

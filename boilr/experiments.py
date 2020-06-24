@@ -176,8 +176,8 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
                             "resume training")
 
     @classmethod
-    def _check_args(cls, args: argparse.Namespace) -> None:
-        super(BaseExperimentManager, cls)._check_args(args)
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+        args = super(BaseExperimentManager, cls)._check_args(args)
 
         # Default: save images at each test
         if args.test_imgs_every is None:
@@ -199,6 +199,8 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
 
         if args.max_grad_norm is not None:
             assert args.max_grad_norm > 0.0
+
+        return args
 
     @staticmethod
     def _make_run_description(args: argparse.Namespace) -> str:
@@ -557,7 +559,9 @@ class VAEExperimentManager(BaseExperimentManager):
                             'evaluate log likelihood')
 
     @classmethod
-    def _check_args(cls, args: argparse.Namespace) -> None:
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+
+        args = super(VAEExperimentManager, cls)._check_args(args)
 
         if args.loglikelihood_every % args.test_log_every != 0:
             msg = ("'loglikelihood_every' must be a multiple of "
@@ -566,8 +570,7 @@ class VAEExperimentManager(BaseExperimentManager):
                              log=args.test_log_every)
             raise ValueError(msg)
 
-        # Check superclass's arguments
-        super(VAEExperimentManager, cls)._check_args(args)
+        return args
 
     def generate_and_save_samples(self, filename: str, nrows: int = 8) -> None:
         """Default method to generate and save model samples.

@@ -116,12 +116,13 @@ class BaseOfflineEvaluator(ObjectWithArgparsedArgs):
                             help='do not use cuda')
 
     @classmethod
-    def _check_args(cls, args: argparse.Namespace) -> None:
-        super(BaseOfflineEvaluator, cls)._check_args(args)
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+        args = super(BaseOfflineEvaluator, cls)._check_args(args)
         if args.load_step is not None:
             warnings.warn(
                 "Loading weights from specific training step is not supported "
                 "for now. The model will be loaded from the last checkpoint.")
+        return args
 
     def run(self):
         """Runs the evaluator."""
