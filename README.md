@@ -140,7 +140,7 @@ methods for variational inference with VAEs.
 
 ```python
 from boilr import Trainer
-from my_experiments import MyExperimentClass
+from my_experiment import MyExperimentClass
 
 if __name__ == "__main__":
     experiment = MyExperimentClass()
@@ -151,11 +151,13 @@ if __name__ == "__main__":
 
 #### Offline evaluator class (5)
 
-If offline evaluation is necessary, `boilr.eval.BaseOfflineEvaluator` can be subclassed by
-implementing:
+If offline evaluation is necessary, `boilr.eval.BaseOfflineEvaluator` can be subclassed by implementing:
+
 - `run` to run the evaluation;
 - as above, `_define_args_defaults`, `_add_args`, and `_check_args` (or a subset of these) to manage parsing of command-line arguments.
+
 The method `run` can be executed by simply calling the evaluator object.
+See `example_evaluate.py`.
 
 
 
