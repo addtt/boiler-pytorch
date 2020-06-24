@@ -4,13 +4,15 @@ import warnings
 
 from boilr.eval import BaseOfflineEvaluator
 from experiments import MnistExperiment
-
+import torch
 
 class Evaluator(BaseOfflineEvaluator):
 
     # TODO this could mostly be made into a generic VAE evaluator
 
     def run(self):
+
+        torch.set_grad_enabled(False)
 
         experiment = self._experiment
         experiment.model.eval()
