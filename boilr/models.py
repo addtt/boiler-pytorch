@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import numpy as np
 import torch
@@ -19,11 +20,11 @@ class BaseModel(nn.Module):
         """Increments global step by 1."""
         self._global_step += 1
 
-    def get_device(self):
+    def get_device(self) -> torch.device:
         """Returns model device."""
         return get_module_device(self)
 
-    def checkpoint(self, ckpt_folder, max_ckpt=None):
+    def checkpoint(self, ckpt_folder: str, max_ckpt: Optional[int] = None):
         """Saves model checkpoint and optionally deletes old ones.
 
         Args:
@@ -53,7 +54,10 @@ class BaseModel(nn.Module):
             except OSError:
                 pass
 
-    def load(self, ckpt_folder, device=None, step=None):
+    def load(self,
+             ckpt_folder: str,
+             device: Optional[torch.device] = None,
+             step: Optional[int] = None):
         """Loads model from checkpoint.
 
         Args:
@@ -78,7 +82,7 @@ class BaseModel(nn.Module):
         print("Loaded.")
 
     @property
-    def global_step(self):
+    def global_step(self) -> int:
         """Global step."""
         return self._global_step
 
@@ -86,7 +90,7 @@ class BaseModel(nn.Module):
 class BaseGenerativeModel(BaseModel):
     """Base class for generative models."""
 
-    def sample_prior(self, n_imgs, **kwargs):
+    def sample_prior(self, n_imgs: int, **kwargs):
         """Samples an observation from the generative model.
 
         Args:

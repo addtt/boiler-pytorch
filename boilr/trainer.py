@@ -14,6 +14,7 @@ except ImportError as e:
     have_tensorboard = False
 from tqdm import tqdm
 
+from boilr.experiments import BaseExperimentManager
 from boilr.nn.utils import global_norm, grad_global_norm
 from boilr.options import get_option
 from boilr.utils import set_rnd_seed, get_date_str
@@ -31,7 +32,7 @@ class Trainer:
         experiment (boilr.experiments.BaseExperimentManager)
     """
 
-    def __init__(self, experiment):
+    def __init__(self, experiment: BaseExperimentManager):
         self.experiment = experiment
         resume = experiment.args.resume != ""
 
@@ -46,11 +47,11 @@ class Trainer:
             warnings.warn(msg)
 
             # Get all folder names to resume saving results
-            tboard_folder = self._setup_paths(folder_str)
+            self._setup_paths(folder_str)
             self.tb_writer = None
             if have_tensorboard:  # maybe we didn't have tboard originally
-                os.makedirs(tboard_folder, exist_ok=True)
-                self.tb_writer = tensorboard.SummaryWriter(tboard_folder)
+                os.makedirs(self._tboard_folder, exist_ok=True)
+                self.tb_writer = tensorboard.SummaryWriter(self._tboard_folder)
 
             # Forget about all arguments, load all of them from saved config
             # (the 'resume' argument is overwritten in the process)
@@ -91,14 +92,15 @@ class Trainer:
             run_descr = experiment.run_description
             if len(run_descr) > 0:
                 folder_str += '_' + experiment.run_description
-            tboard_folder = self._setup_paths(folder_str)
+            self._setup_paths(folder_str)
             self.tb_writer = None
             if not args.dry_run:
                 os.makedirs(self.img_folder)
                 os.makedirs(self.checkpoint_folder)
                 if have_tensorboard:
-                    os.makedirs(tboard_folder)
-                    self.tb_writer = tensorboard.SummaryWriter(tboard_folder)
+                    os.makedirs(self._tboard_folder)
+                    self.tb_writer = tensorboard.SummaryWriter(
+                        self._tboard_folder)
                 config_path = os.path.join(self.checkpoint_folder, 'config.pkl')
                 with open(config_path, 'wb') as fd:
                     pickle.dump(args, fd)
@@ -111,14 +113,14 @@ class Trainer:
         # Check everything is initialized properly
         self._check_experiment(experiment)
 
-    def _setup_paths(self, folder_str):
+    def _setup_paths(self, folder_str: str):
         result_folder = os.path.join('output', folder_str, 'results')
         self.img_folder = os.path.join(result_folder, 'imgs')
         self.checkpoint_folder = os.path.join('output', folder_str,
                                               'checkpoints')
         self.log_path = os.path.join(result_folder, 'log.pkl')
-        tboard_folder = os.path.join('output', folder_str, 'tensorboard_logs')
-        return tboard_folder
+        self._tboard_folder = os.path.join('output', folder_str,
+                                           'tensorboard_logs')
 
     def run(self):
         """Runs the trainer."""
@@ -281,7 +283,7 @@ class Trainer:
         else:
             print("Reached steps limit ({} steps)".format(e.args.max_steps))
 
-    def _test(self, epoch):
+    def _test(self, epoch: int):
         e = self.experiment
         step = e.model.global_step
 
@@ -316,14 +318,14 @@ class Trainer:
         # Training mode
         e.model.train()
 
-    def _history_dict(self):
+    def _history_dict(self) -> dict:
         return {
             'train': self.train_history.get_dict(),
             'test': self.test_history.get_dict(),
         }
 
     @staticmethod
-    def _check_experiment(e):
+    def _check_experiment(e: BaseExperimentManager):
         attributes = [
             e.device,
             e.dataloaders,

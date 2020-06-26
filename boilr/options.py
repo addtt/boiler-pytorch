@@ -1,6 +1,7 @@
 """Package-wide options."""
 
 from copy import deepcopy
+from typing import Any, Optional
 
 # Define options and set default values
 _options = {
@@ -38,7 +39,7 @@ def set_options(**kwargs):
     _options.update(**kwargs)
 
 
-def get_option(name):
+def get_option(name: str) -> Any:
     """Returns the current value of the specified option.
 
     Args:
@@ -50,16 +51,16 @@ def get_option(name):
     return _get_options(name)
 
 
-def get_options():
+def get_options() -> dict:
     """Returns the current value of all options.
 
     Returns:
-        options (dict): all packagewide options
+        options (dict): all package-wide options
     """
     return _get_options()
 
 
-def _get_options(name=None):
+def _get_options(name: Optional[str] = None) -> Any:
     """Returns the current value of either one or all options.
 
     Args:
@@ -74,7 +75,7 @@ def _get_options(name=None):
     return deepcopy(_options[name])
 
 
-def _check_option(name, value):
+def _check_option(name: str, value: Any) -> bool:
     """Check that the value is valid for the option with the given name.
 
     Args:

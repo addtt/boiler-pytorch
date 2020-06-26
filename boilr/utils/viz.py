@@ -1,9 +1,11 @@
 import os
 from collections import OrderedDict
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from torch import nn
 from torchvision.utils import make_grid
 from torchvision.utils import save_image
 
@@ -12,7 +14,7 @@ from boilr.nn.utils import named_leaf_modules
 img_folder = None
 
 
-def _unique_filename(fname, extension):
+def _unique_filename(fname: str, extension: str) -> str:
 
     def exists(fname):
         return os.path.exists(fname + '.' + extension)
@@ -26,7 +28,11 @@ def _unique_filename(fname, extension):
     raise RuntimeError("too many files ({})".format(i))
 
 
-def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
+def plot_imgs(imgs: torch.Tensor,
+              name: Optional[str] = None,
+              extension: Optional[str] = 'png',
+              colorbar: Optional[bool] = True,
+              overwrite: Optional[bool] = False):
     """Saves collection of images.
 
     Plots collection of 1-channel images (as 3D tensor, or 4D tensor with size
@@ -105,7 +111,8 @@ def plot_imgs(imgs, name=None, extension='png', colorbar=True, overwrite=False):
         im.save(fname, format=None)
 
 
-def img_grid_pad_value(imgs, thresh=.2):
+def img_grid_pad_value(imgs: torch.Tensor,
+                       thresh: Optional[float] = .2) -> float:
     """Returns padding value (black or white) for a grid of images.
 
     Hack to visualize boundaries between images with torchvision's
@@ -138,7 +145,9 @@ def img_grid_pad_value(imgs, thresh=.2):
     return 0.0
 
 
-def save_image_grid(images, filename, nrows=8):
+def save_image_grid(images: torch.Tensor,
+                    filename: str,
+                    nrows: Optional[int] = 8):
     """Saves a grid of images.
 
     Wrapper around torchvision save_image. The grid lines are either black or
@@ -154,7 +163,8 @@ def save_image_grid(images, filename, nrows=8):
     save_image(images, filename, nrow=nrows, pad_value=pad)
 
 
-def save_image_grid_reconstructions(inputs, recons, filename):
+def save_image_grid_reconstructions(inputs: torch.Tensor, recons: torch.Tensor,
+                                    filename: str):
     """Saves a grid of images with inputs and reconstructions.
 
     This is meant for autoencoder-like models. The number of images is inferred
@@ -174,8 +184,10 @@ def save_image_grid_reconstructions(inputs, recons, filename):
     save_image_grid(imgs, filename, nrows=n)
 
 
-def balanced_approx_factorization(x, ratio=1):
-    """Approximately factorize an integer into integers.
+def balanced_approx_factorization(x: int,
+                                  ratio: Optional[Union[float, int]] = 1
+                                 ) -> Tuple[int, int]:
+    """Approximately factorizes an integer into integers.
 
     Useful for example to plot images in a grid.
 
@@ -196,11 +208,14 @@ def balanced_approx_factorization(x, ratio=1):
     return r, c
 
 
-def balanced_factorization(x):
-    """
-    Util to plot images in a grid.
+def balanced_factorization(x: int) -> Tuple[int, int]:
+    """Approximately factorizes an integer into integers.
 
-    :param x: number to be factorized
+    Args:
+        x (int): Number to be approximately factorized
+
+    Returns:
+        dims (tuple): A tuple (rows, columns)
     """
 
     assert type(x) == int or x.dtype == int
@@ -241,7 +256,7 @@ def _save_activation_hook(ord_dict, name):
     return hook
 
 
-def set_up_saving_all_activations(model):
+def set_up_saving_all_activations(model: nn.Module) -> OrderedDict:
     """Registers forward hooks to save all activations in a model.
 
     It returns a dictionary that will be populated by the forward hooks at

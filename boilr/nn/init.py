@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 from torch import nn
 
@@ -83,7 +85,9 @@ def _get_data_dep_hook(init_scale):
     return hook
 
 
-def data_dependent_init(model, model_input_dict, init_scale=.1):
+def data_dependent_init(model: nn.Module,
+                        model_input_dict: dict,
+                        init_scale: Optional[float] = .1) -> None:
     """Performs data-dependent initialization on a model.
 
     Updates each layer's weights such that its outputs, computed on a batch

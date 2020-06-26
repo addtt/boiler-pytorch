@@ -1,5 +1,8 @@
 """Useful basic layers and ops for neural nets."""
 
+from typing import Sequence, Optional
+
+import torch
 from torch import nn
 from torch.nn import functional as F
 
@@ -79,7 +82,7 @@ class Identity(nn.Module):
         return x
 
 
-def pad_img_tensor(x, size):
+def pad_img_tensor(x: torch.Tensor, size: Sequence[int]) -> torch.Tensor:
     """Pads a tensor.
 
     Pads a tensor of shape (batch, channels, h, w) to new height and width
@@ -87,7 +90,7 @@ def pad_img_tensor(x, size):
 
     Args:
         x (torch.Tensor): Input image
-        size (iterable): Desired size (height, width)
+        size (list or tuple): Desired size (height, width)
 
     Returns:
         The padded tensor
@@ -96,7 +99,7 @@ def pad_img_tensor(x, size):
     return _pad_crop_img(x, size, 'pad')
 
 
-def crop_img_tensor(x, size):
+def crop_img_tensor(x: torch.Tensor, size: Sequence[int]) -> torch.Tensor:
     """Crops a tensor.
 
     Crops a tensor of shape (batch, channels, h, w) to new height and width
@@ -104,7 +107,7 @@ def crop_img_tensor(x, size):
 
     Args:
         x (torch.Tensor): Input image
-        size (iterable): Desired size (height, width)
+        size (list or tuple): Desired size (height, width)
 
     Returns:
         The cropped tensor
@@ -112,7 +115,8 @@ def crop_img_tensor(x, size):
     return _pad_crop_img(x, size, 'crop')
 
 
-def _pad_crop_img(x, size, mode):
+def _pad_crop_img(x: torch.Tensor, size: Sequence[int],
+                  mode: str) -> torch.Tensor:
     """ Pads or crops a tensor.
 
     Pads or crops a tensor of shape (batch, channels, h, w) to new height
@@ -120,7 +124,7 @@ def _pad_crop_img(x, size, mode):
 
     Args:
         x (torch.Tensor): Input image
-        size (iterable): Desired size (height, width)
+        size (list or tuple): Desired size (height, width)
         mode (str): Mode, either 'pad' or 'crop'
 
     Returns:
@@ -148,7 +152,10 @@ def _pad_crop_img(x, size, mode):
         return x[:, :, dr1:x_size[0] - dr2, dc1:x_size[1] - dc2]
 
 
-def free_bits_kl(kl, free_bits, batch_average=False, eps=1e-6):
+def free_bits_kl(kl: torch.Tensor,
+                 free_bits: float,
+                 batch_average: Optional[bool] = False,
+                 eps: Optional[float] = 1e-6) -> torch.Tensor:
     """Computes free-bits version of KL divergence.
 
     Takes in the KL with shape (batch size, layers), returns the KL with

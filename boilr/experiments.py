@@ -33,6 +33,7 @@ class BaseExperimentManager(ObjectWithArgparsedArgs):
         self._dataloaders = None
         self._model = None
         self._optimizer = None
+        self._device = None
         self._run_description = self._make_run_description(self.args)
 
     @classmethod

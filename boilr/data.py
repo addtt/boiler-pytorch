@@ -1,4 +1,7 @@
-from torch.utils.data import DataLoader
+import argparse
+from typing import Tuple
+
+from torch.utils.data import Dataset, DataLoader
 
 
 class BaseDatasetManager:
@@ -14,7 +17,7 @@ class BaseDatasetManager:
         cuda (bool): Whether the device in use is cuda
     """
 
-    def __init__(self, cfg, cuda, **kwargs):
+    def __init__(self, cfg: argparse.Namespace, cuda: bool, **kwargs):
 
         # Define training and test set
         tr_set, ts_set = self._make_datasets(cfg, **kwargs)
@@ -28,7 +31,8 @@ class BaseDatasetManager:
         self._color_ch = self._data_shape[0]
 
     @classmethod
-    def _make_datasets(cls, cfg, **kwargs):
+    def _make_datasets(cls, cfg: argparse.Namespace,
+                       **kwargs) -> Tuple[Dataset, Dataset]:
         """Returns training and test sets as PyTorch Datasets.
 
         Args:
@@ -37,7 +41,9 @@ class BaseDatasetManager:
         raise NotImplementedError
 
     @classmethod
-    def _make_dataloaders(cls, train, test, cfg, cuda, **kwargs):
+    def _make_dataloaders(cls, train: Dataset, test: Dataset,
+                          cfg: argparse.Namespace, cuda: bool,
+                          **kwargs) -> Tuple[DataLoader, DataLoader]:
         """Returns training and test data loaders.
 
         Default data loaders provided here. Override for custom data loaders.
@@ -71,26 +77,26 @@ class BaseDatasetManager:
         return dl_train, dl_test
 
     @property
-    def train(self):
+    def train(self) -> DataLoader:
         """DataLoader for training set"""
         return self._train
 
     @property
-    def test(self):
+    def test(self) -> DataLoader:
         """DataLoader for test set"""
         return self._test
 
     @property
-    def data_shape(self):
+    def data_shape(self) -> Tuple[int, int, int]:
         """Shape of each datapoint (image): (channels, height, width)."""
         return self._data_shape
 
     @property
-    def img_size(self):
+    def img_size(self) -> Tuple[int, int]:
         """Spatial shape of each datapoint (image): height, width."""
         return self._img_size
 
     @property
-    def color_ch(self):
+    def color_ch(self) -> int:
         """Number of color channels of each datapoint (image)."""
         return self._color_ch

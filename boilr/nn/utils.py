@@ -1,14 +1,16 @@
 import math
 from collections import OrderedDict
+from typing import Optional, Union, Iterator, Tuple
 
 import torch
+from torch import nn
 
 from boilr.options import get_option
 
 __sentinel = object()
 
 
-def print_num_params(model, max_depth=__sentinel):
+def print_num_params(model: nn.Module, max_depth: Optional[int] = __sentinel):
     """Prints overview of model architecture with number of parameters.
 
     Optionally, it groups together parameters below a certain depth in the
@@ -49,7 +51,8 @@ def print_num_params(model, max_depth=__sentinel):
     print("---------\n")
 
 
-def grad_global_norm(parameters, norm_type=2):
+def grad_global_norm(parameters: Union[Iterable[torch.Tensor], torch.Tensor],
+                     norm_type: Optional[Union[float, int]] = 2) -> float:
     """Compute global norm of the gradients of an iterable of parameters.
 
     The norm is computed over all gradients together, as if they were
@@ -70,7 +73,8 @@ def grad_global_norm(parameters, norm_type=2):
     return global_norm(grads, norm_type=norm_type)
 
 
-def global_norm(parameters, norm_type=2):
+def global_norm(parameters: Union[Iterable[torch.Tensor], torch.Tensor],
+                norm_type: Optional[Union[float, int]] = 2) -> float:
     """Compute global norm of an iterable of parameters.
 
     The norm is computed over all tensors together, as if they were
@@ -100,7 +104,7 @@ def global_norm(parameters, norm_type=2):
     return total_norm
 
 
-def get_module_device(module):
+def get_module_device(module: nn.Module) -> torch.device:
     """Returns the module's device.
 
     This is a simple trick, it is probably not robust.
@@ -114,17 +118,17 @@ def get_module_device(module):
     return next(module.parameters()).device
 
 
-def is_conv(module):
+def is_conv(module: nn.Module) -> bool:
     """Returns whether the module is a convolutional layer."""
     return isinstance(module, torch.nn.modules.conv._ConvNd)
 
 
-def is_linear(module):
+def is_linear(module: nn.Module) -> bool:
     """Returns whether the module is a linear layer."""
     return isinstance(module, torch.nn.Linear)
 
 
-def named_leaf_modules(module):
+def named_leaf_modules(module: nn.Module) -> Iterator[Tuple[str, nn.Module]]:
     """Yields (name, module) pairs that are leaves in the module tree."""
 
     # Should work under common naming assumptions, but it's not guaranteed
