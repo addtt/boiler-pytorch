@@ -1,8 +1,9 @@
 import argparse
+from typing import Optional
 
 from torch import optim
 
-import boilr
+import boilr.data
 from boilr import VAEExperimentManager
 from models.mnist_vae import MnistVAE
 from .data import DatasetManager
@@ -94,17 +95,47 @@ class MnistExperiment(VAEExperimentManager):
                             dest='weight_decay',
                             help='weight decay')
 
+    @classmethod
+    def _check_args(cls, args: argparse.Namespace) -> argparse.Namespace:
+        args = super(MnistExperiment, cls)._check_args(args)
+        if args.weight_decay < 0:
+            raise ValueError("'weight_decay' must be nonnegative")
+        return args
+
     @staticmethod
     def _make_run_description(args):
-        """
-        Create a string description of the run. It is used in the names of the
-        logging folders.
-
-        :param args: experiment config
-        :return: the run description
-        """
+        # Can be (but doesn't have to be) overridden
         s = ''
         s += 'seed{}'.format(args.seed)
         if len(args.additional_descr) > 0:
             s += ',' + args.additional_descr
         return s
+
+    def post_backward_callback(self) -> None:
+        # Can be (but doesn't have to be) overridden
+        super(MnistExperiment, self).post_backward_callback()
+
+    @classmethod
+    def get_metrics_dict(cls, results: dict) -> dict:
+        # Can be (but doesn't have to be) overridden
+        return super(MnistExperiment, cls).get_metrics_dict(results)
+
+    @classmethod
+    def train_log_str(cls,
+                      summaries: dict,
+                      step: int,
+                      epoch: Optional[int] = None) -> str:
+        # Can be (but doesn't have to be) overridden
+        return super(MnistExperiment, cls).train_log_str(summaries,
+                                                         step,
+                                                         epoch=epoch)
+
+    @classmethod
+    def test_log_str(cls,
+                     summaries: dict,
+                     step: int,
+                     epoch: Optional[int] = None) -> str:
+        # Can be (but doesn't have to be) overridden
+        return super(MnistExperiment, cls).test_log_str(summaries,
+                                                        step,
+                                                        epoch=epoch)
