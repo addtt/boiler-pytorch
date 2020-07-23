@@ -1,6 +1,6 @@
 import math
 from collections import OrderedDict
-from typing import Optional, Union, Iterator, Tuple
+from typing import Optional, Union, Iterable, Tuple
 
 import torch
 from torch import nn
@@ -128,7 +128,7 @@ def is_linear(module: nn.Module) -> bool:
     return isinstance(module, torch.nn.Linear)
 
 
-def named_leaf_modules(module: nn.Module) -> Iterator[Tuple[str, nn.Module]]:
+def named_leaf_modules(module: nn.Module) -> Iterable[Tuple[str, nn.Module]]:
     """Yields (name, module) pairs that are leaves in the module tree."""
 
     # Should work under common naming assumptions, but it's not guaranteed
