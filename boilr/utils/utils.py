@@ -69,5 +69,7 @@ def checkpoints_in_folder(folder):
     regex = re.compile(r'\d+')
     numbers = list([int(regex.search(n).group(0)) for n in filenames])
     assert len(filenames) == len(numbers)
-    filenames = list([filenames[i] for i in np.argsort(numbers)])
+    sorted_idx = np.argsort(numbers)
+    numbers = list([numbers[i] for i in sorted_idx])
+    filenames = list([filenames[i] for i in sorted_idx])
     return filenames, numbers
